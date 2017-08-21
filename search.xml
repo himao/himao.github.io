@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title><![CDATA[KVM管理工具oVirt安装和使用]]></title>
+    <url>%2F2017%2F08%2F21%2FKVM%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7oVirt%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8%2F</url>
+    <content type="text"><![CDATA[oVirt是一款kvm的管理工具，相比virsh来说方便很多。这里记录下安装和使用中的问题，备忘查询。 oVirt安装配置安装配置oVirt源：1yum install http://resources.ovirt.org/pub/yum-repo/ovirt-release41.rpm 可参考官方文档，这里安装的是4.1版本。安装ovirt-engine12yum updateyum install ovirt-engine 安装的依赖比较多，可能要等待一段时间。]]></content>
+      <tags>
+        <tag>虚拟化</tag>
+        <tag>kvm</tag>
+        <tag>oVirt</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[LVS+keepalived+Windows+IIS负载均衡系统简单搭建]]></title>
+    <url>%2F2017%2F08%2F18%2FLVS%2Bkeepalived%2BWindows%2BIIS%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%B3%BB%E7%BB%9F%E7%AE%80%E5%8D%95%E6%90%AD%E5%BB%BA%2F</url>
+    <content type="text"><![CDATA[简单记录LVS+keepalived负载均衡场景中，Windows+IIS作为后端realserver的搭建配置过程。由于LVS+keepalived仅支持Linux，所以这里均衡器本身还是基于Linux环境。 keepalived和LVS的安装配置目前的Linux内核均已包含了lvs模块，不需要另行安装，仅需安装一个ipvsadm的lvs管理器，方便管理调试。1apt install keepalived ipvsadm 安装完成后，可以在/etc/keepalived或者/usr/share/doc/keepalived目录下找到安装包自带的配置文件模板，keepalived的主配置文件为/etc/keepalived/keepalived.conf，可参考修改。lvs配合keepalived来使用，相关配置也在这个文件里。简单的配置文件如下：1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253global_defs &#123; notification_email &#123; test@test.com &#125; notification_email_from test@test.com smtp_server 127.0.0.1 smtp_connect_timeout 30 router_id LVS_Test&#125;vrrp_instance VI_1 &#123; state MASTER interface enp3s0 virtual_router_id 66 priority 150 advert_int 1 authentication &#123; auth_type PASS auth_pass 1111 &#125; virtual_ipaddress &#123; 172.16.10.228 &#125;&#125;virtual_server 172.16.10.228 80 &#123; delay_loop 6 lb_algo wlc lb_kind DR nat_mask 255.255.255.0# persistence_timeout 900 protocol TCP real_server 172.16.10.217 80 &#123; weight 1 TCP_CHECK &#123; connect_timeout 3 nb_get_retry 3 delay_before_retry 3 connect_port 80 &#125; &#125; real_server 172.16.10.222 80 &#123; weight 1 TCP_CHECK &#123; connect_timeout 3 nb_get_retry 3 delay_before_retry 3 connect_port 80 &#125; &#125;&#125; 配置完成后启动keepalived服务，确保启动成功，在同一网络中ping虚IP，ping通则证明keepalived启动成功。这样我们的单点均衡器就配置成功了。 配置Window主机为realserverrealserver作为真正提供服务的主机，不同的系统有不同的配置方法，但基本操作都是修改网卡配置，确定系统能够正确处理虚IP的流量。Windows系统下的操作为增加一个环回网卡，配置改网卡接口IP为虚IP。]]></content>
+      <tags>
+        <tag>Windows</tag>
+        <tag>IIS</tag>
+        <tag>LVS</tag>
+        <tag>keepalived</tag>
+        <tag>负载均衡</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[关闭Filezilla Server Interface的开机启动]]></title>
+    <url>%2F2017%2F07%2F28%2F%E5%85%B3%E9%97%ADFilezilla%20Server%20Interface%E7%9A%84%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8%2F</url>
+    <content type="text"><![CDATA[使用Filezilla Server搭建FTP服务时可能会安装一个名为Filezilla Server Interface的程序，用于管理Filezilla Server的FTP服务。默认情况下这个管理接口程序是开机启动的，在服务器上使用时，每次远程桌面连接都会自动启动弹出，有些烦人，从网上搜索到关闭的办法，记录备忘。注意，这里关闭时的Filezilla Server的管理接口程序的开机启动，而不是把FTP服务的开机启动关掉。关闭的方法就是修改注册表，据网上资料，在不同的系统中安装不同版本的程序，要修改的注册表键值可能是不一样的（32/64位系统和程序问题）,可以在下面两个地方找一下名为Filezilla Server Interface的键值，删掉就可以了。12HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Run\ 参考资料http://www.leeroy.me/disable-filezilla-server-interface-autostart-on-server-logon/]]></content>
+      <tags>
+        <tag>troubleshooting</tag>
+        <tag>tools</tag>
+        <tag>ftp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[VMware ESXi 6.5集成第三方驱动]]></title>
+    <url>%2F2017%2F07%2F24%2FVMware%20ESXi%206.5%E9%9B%86%E6%88%90%E7%AC%AC%E4%B8%89%E6%96%B9%E9%A9%B1%E5%8A%A8%2F</url>
+    <content type="text"><![CDATA[官方下载的ESXi安装镜像可能因缺少部分设备驱动而无法安装，VMware官方提供了基于原版镜像的第三方驱动集成文档。这里已集成网卡驱动为例，简单记录ESXi驱动集成过程。 准备工作 ESXi6.5脱机捆绑包脱机捆绑包通过官网下载，在官网注册，申请评估ESXi，即可以下载脱机捆绑包，注意不是安装镜像，比安装镜像小一点。 第三方驱动脱机捆绑包第三方驱动的脱机捆绑包可能不太好找，一般都是第三方提供。一般我们要找的最多的是网卡驱动，这里有一个网站可以参考https://vibsdepot.v-front.de/wiki/index.php/List_of_currently_available_ESXi_packages这里使用的是net55-r8168的网卡驱动，网卡驱动一般支持一个系列，可以查询自己的网卡型号找到对应的驱动包，注意下载offline bundle标识的软件包，VIB驱动文件似乎在ESXi6.5版本已不支持集成了。 集成工具PowerCLI以管理员身份打开PowerShell，在PowerShell中安装VMware.PowerCLI模块： 1PS C:\WINDOWS\system32&gt; Install-Module -Name VMware.PowerCLI 可能会提示需要其他模块支持和信任问题，输入Y确认接受。受限于网络问题，安装过程下载可能会很慢，耗时较长。可能会提示会覆盖本地部分命令，需使用参数重新确认执行：1PS C:\WINDOWS\system32&gt; Install-Module -Name VMware.PowerCLI -AllowClobber 正确安装完成后，无任何提示。PowerCLI官方参考https://www.powershellgallery.com/packages/VMware.PowerCLI/6.5.1.5377412 集成驱动把上面下载的两个脱机捆绑包放在同一个目录下，以管理员身份运行PowerShell，首先设置脚本执行策略并检查：12345# 设置脚本执行策略，会提示风险确认PS D:\Downloads\esxi&gt; Set-ExecutionPolicy RemoteSigned# 检查设置，返回RemoteSigned即设置成功PS D:\Downloads\esxi&gt; Get-ExecutionPolicyRemoteSigned 切换到镜像和驱动的目录下，开始集成驱动： 添加第三方驱动包到库，注意文件名要和你下载的一致： 123456PS D:\Downloads\esxi&gt; Add-EsxSoftwareDepot .\net55-r8168-8.039.01-napi-offline_bundle.zipDepot Url---------zip:D:\Downloads\esxi\net55-r8168-8.039.01-napi-offline_bundle.zip?index.xml 检查当前库，记住驱动name项的值，后面集成时会用到： 123456PS D:\Downloads\esxi&gt; Get-EsxSoftwarePackageName Version Vendor Creation Date---- ------- ------ -------------net55-r8168 8.039.01-napi Realtek 2015/1/16 10:... 添加镜像到库，注意文件名要和你下载的一致： 123456PS D:\Downloads\esxi&gt; Add-EsxSoftwareDepot .\ESXi650-201701001.zipDepot Url---------zip:D:\Downloads\esxi\ESXi650-201701001.zip?index.xml 检查当前库： 1234567PS D:\Downloads\esxi&gt; Get-EsxImageProfileName Vendor Last Modified Acceptance Level---- ------ ------------- ----------------ESXi-6.5.0-20170104001-stan... VMware, Inc. 2017/1/6 4:2... PartnerSupportedESXi-6.5.0-20170104001-no-t... VMware, Inc. 2017/1/6 4:2... PartnerSupported 以当前可用镜像配置文件为基础克隆一个新镜像的配置文件，名字可自定义，名字即为集成驱动后安装镜像名字： 123456PS D:\Downloads\esxi&gt; New-EsxImageProfile -CloneProfile ESXi-6.5.0-20170104001-standard -name r8168 -Vendor RealtekName Vendor Last Modified Acceptance Level---- ------ ------------- ----------------r8168 Realtek 2017/1/6 4:2... PartnerSupported 检查新配置文件的接受权限： 12345678PS D:\Downloads\esxi&gt; Get-EsxImageProfileName Vendor Last Modified Acceptance Level---- ------ ------------- ----------------ESXi-6.5.0-20170104001-stan... VMware, Inc. 2017/1/6 4:2... PartnerSupportedr8168 Realtek 2017/1/6 4:2... PartnerSupportedESXi-6.5.0-20170104001-no-t... VMware, Inc. 2017/1/6 4:2... PartnerSupported 修改新配置文件的接受权限为CommunitySupported，会提示输入镜像配置文件名称，输入刚才自定义的配置文件名称： 1234567891011PS D:\Downloads\esxi&gt; Set-EsxImageProfile -Name r8168 -AcceptanceLevel CommunitySupported位于命令管道位置 1 的 cmdlet Set-EsxImageProfile请为以下参数提供值:(请键入 !? 以查看帮助。)ImageProfile: r8168Name Vendor Last Modified Acceptance Level---- ------ ------------- ----------------r8168 Realtek 2017/7/21 13... CommunitySupported 将第三方驱动添加到新的配置文件中去，注意使用第2步中查看到的名称： 123456PS D:\Downloads\esxi&gt; Add-EsxSoftwarePackage -ImageProfile r8168 -SoftwarePackage net55-r8168Name Vendor Last Modified Acceptance Level---- ------ ------------- ----------------r8168 Realtek 2017/7/21 13... CommunitySupported 根据新配置文件，导出新的已集成驱动的镜像： 12PS D:\Downloads\esxi&gt; Export-EsxImageProfile -ImageProfile r8168 -ExportToISO -filepath d:\esxi6.5_r8168.iso Done! 参考文档 http://bbs.vmsky.com/thread-57902-1-1.htmlhttps://www.v-front.de/p/esxi-community-packaging-tools.htmlhttps://www.v-front.de/p/esxi-customizer-ps.htmlhttps://www.v-front.de/p/esxi-customizer.html#downloadhttp://www.cnblogs.com/z-books/p/5610848.htmlhttps://vibsdepot.v-front.de/wiki/index.php/Welcome]]></content>
+      <tags>
+        <tag>VMware</tag>
+        <tag>Hypervisor</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[解决CentOS 7中yum解析IPv6无法更新问题]]></title>
+    <url>%2F2017%2F07%2F08%2F%E8%A7%A3%E5%86%B3CentOS%207%E4%B8%ADyum%E8%A7%A3%E6%9E%90IPv6%E6%97%A0%E6%B3%95%E6%9B%B4%E6%96%B0%E9%97%AE%E9%A2%98%2F</url>
+    <content type="text"><![CDATA[不知道是什么原因，在CentOS 7中yum更新时总会把源列表域名解析到IPv6地址，而很多时候网络环境是不支持IPv6的，这时yum就无法更新。 在网上搜索了很久，很多提到了禁用IPv6，进过实践，禁用IPv6并不能解决这个问题。yum依然会解析到IPv6的地址。最后在网上找到了一个配置，直接在yum配置文件里指明IP解析为IPv4，实践证明这个方法可行。理论上是不需要关闭IPv6，但我的环境已经关闭了IPv6，并未验证。123456789# 修改yum配置文件vi /etc/yum.conf# 增加ip解析配置ip_resolve=4# 更新确认yum update]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>troubleshooting</tag>
+        <tag>centos</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Docker的数据卷和数据卷容器]]></title>
+    <url>%2F2017%2F07%2F08%2FDocker%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8D%B7%E5%92%8C%E6%95%B0%E6%8D%AE%E5%8D%B7%E5%AE%B9%E5%99%A8%2F</url>
+    <content type="text"><![CDATA[使用数据卷在使用docker run命令时,可以使用-v参数在容器内创建一个数据卷,多次使用-v参数可以创建多个数据卷.12docker run -dit -v /data ubuntudocker run -dit -v /data1 -v /data2 ubuntu 实际使用中,我们更常用到把容器外部的目录挂载到容器内部使用,可以理解为宿主机目录和容器目录的一种映射或挂载.12docker run -dit -v /host/dir:/container/dir ubuntudocker run -dit -v /host/dir1:/container/dir1 -v /host/dir2:/container/dir2 ubuntu 外部目录必须为绝对路径,如果目录不存在,docker会自动创建.默认情况下,docker挂载的数据卷在容器内部是可读写的,也可以通过ro参数指定为只读.1docker run -dit -v /host/dir:/container/dir:ro ubuntu -v参数不仅可以挂载本地目录到容器中作为数据卷，也可以挂载本地文件到容器中作为数据卷。1docker run -dit -v /etc/my.cnf:/etc/my.cnf ubuntu 在dockerfile中使用数据卷需要使用VOLUME指令。1VOLUME /data/dir 使用数据卷容器]]></content>
+      <tags>
+        <tag>docker</tag>
+        <tag>容器</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[VisualSVN Server 增加修改密码功能]]></title>
+    <url>%2F2017%2F07%2F06%2FVisualSVN%20Server%20%E5%A2%9E%E5%8A%A0%E4%BF%AE%E6%94%B9%E5%AF%86%E7%A0%81%E5%8A%9F%E8%83%BD%2F</url>
+    <content type="text"><![CDATA[VisualSVN Server支持用户自己修改密码，但只能通过VisualSVN Client来修改。实际使用中，可能考虑在svn的web页面上修改更方便。VisualSVN 本身不支持这个特性，不过小小hack一下就可以达到我们的目的。网上搜到的资料大概有三种方法解决这个问题，这里实践了一种，记录之。 概述这种方法的原理为创建一个php页面，php调用htpasswd.exe来修改密码文件。 Hack修改之前需确认VisualSVN的版本信息，确认是32位还是64位，以此来下载对应的Apache包和php包。 安装htpasswd.exe在Apache官网下载和VisualSVN集成的Apache版本一致的完整包，找到htpasswd.exe文件，复制到VisualSVN的bin目录下。Windows版Apache下载：http://httpd.apache.org/download.cgihttp://www.apachehaus.com/cgi-bin/download.plxhtpasswd.exe程序应该是通用的，尽量前面两个版本号保持一致。 安装PHPApache 2.2.x 要以 handler 方式加载 php 模块，只有 php 5.2-5.4 的 Thread Safe 版本才带php5apache2_2.dll 文件，php 5.5 及之后的版本只能和 Apache 2.4.x 搭配了，所以选定 php 5.4 版本。php官网都是32位的，64位不太好找，可以从这里下载：https://www.anindya.com/php-5-4-12-and-5-3-22-x64-64-bit-for-windows/下载解压后放到VisualSVN的根目录下，重命名为php目录，把php目录下的php.ini-production重命名为php.ini即可。 Apache加载php模块修改空文件VisualSVN Server\conf\httpd-custom.conf，添加一下内容，使Apache加载PHP模块： 1234567LoadModule php5_module "php/php5apache2_2.dll"&lt;IfModule php5_module&gt; AddType application/x-httpd-php .php DirectoryIndex index.html index.php&lt;/IfModule&gt;# 配置 php.ini 的路径PHPIniDir "php" 创建php文件实现修改密码逻辑在VisualSVN Server\htdocs\目录下新建一个目录，创建一个index.php文件，内容如下。注意替换其中两个变量值为当前环境的值，$passwdfile为密码文件的绝对路径，$command为之前放置htpasswd.exe文件的绝对路径。 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899100101102103104105106107108109110111112113114115116117118119120121122123124125126127128129130131132133134135136137138139140141142143144145146147148149150151152153154155156157158159160&lt;?php$username = $_SERVER["PHP_AUTH_USER"]; //经过 AuthType Basic 认证的用户名$authed_pass = $_SERVER["PHP_AUTH_PW"]; //经过 AuthType Basic 认证的密码$input_oldpass = (isset($_REQUEST["oldpass"]) ? $_REQUEST["oldpass"] : ""); //从界面上输入的原密码$newpass = (isset($_REQUEST["newpass"]) ? $_REQUEST["newpass"] : ""); //界面上输入的新密码$repeatpass = (isset($_REQUEST["repeatpass"]) ? $_REQUEST["repeatpass"] : ""); //界面上输入的重复密码$action = (isset($_REQUEST["action"]) ? $_REQUEST["action"] : ""); //以hide方式提交到服务器的actionif ($action!="modify") &#123; $action = "view";&#125; else if ($authed_pass!=$input_oldpass) &#123; $action = "oldpasswrong";&#125; else if (empty($newpass)) &#123; $action = "passempty";&#125; else if ($newpass!=$repeatpass) &#123; $action = "passnotsame";&#125; else&#123; $action = "modify";&#125;?&gt;&lt;html&gt;&lt;head&gt; &lt;meta http-equiv="Content-Type" content="text/html; charset=GBK"&gt; &lt;title&gt;Subversion 在线自助密码修改&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;?php//action=view 显示普通的输入信息if ($action == "view") &#123;?&gt;&lt;script language = "javaScript"&gt;&lt;!--function loginIn(myform) &#123; var newpass=myform.newpass.value; var repeatpass=myform.repeatpass.value; if (newpass=="") &#123; alert("请输入密码！"); return false; &#125; if (repeatpass=="") &#123; alert("请重复输入密码！"); return false; &#125; if (newpass!=repeatpass) &#123; alert("两次输入密码不一致，请重新输入！"); return false; &#125;return true;&#125;//--&gt;&lt;/script&gt;&lt;style type="text/css"&gt;&lt;!-- table &#123; border: 1px solid #CCCCCC; background-color: #f9f9f9; text-align: center; vertical-align: middle; font-size: 9pt; line-height: 15px; &#125; th &#123; font-weight: bold; line-height: 20px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; color: #333333; background-color: f6f6f6; &#125; input&#123; height: 18px; &#125; .button &#123; height: 20px; &#125;--&gt;&lt;/style&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;form method="post"&gt;&lt;input type="hidden" name="action" value="modify"/&gt;&lt;table width="220" cellpadding="3" cellspacing="8" align="center"&gt;&lt;tr&gt;&lt;th colspan=2&gt;Subversion 密码修改&lt;/th&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;用 户 名：&lt;/td&gt;&lt;td align="left"&gt; &lt;?php echo $username?&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;原 密 码：&lt;/td&gt;&lt;td&gt;&lt;input type=password size=12 name=oldpass&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;用户密码：&lt;/td&gt;&lt;td&gt;&lt;input type=password size=12 name=newpass&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;确认密码：&lt;/td&gt;&lt;td&gt;&lt;input type=password size=12 name=repeatpass&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan=2&gt;&lt;input onclick="return loginIn(this.form)" class="button" type=submit value="修 改"&gt;&lt;input name="reset" type=reset class="button" value="取 消"&gt;&lt;input onclick="window.location.href='/'" class="button" type="button" value="返 回"&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/form&gt;&lt;?php&#125; else if ($action == "oldpasswrong") &#123; $msg="原密码错误！";&#125; else if ($action == "passempty") &#123; $msg="请输入新密码！";&#125; else if ($action == "passnotsame") &#123; $msg="两次输入密码不一致，请重新输入！";&#125; else &#123; $passwdfile="D:\Repositories\htpasswd"; $command='"C:\Program Files\VisualSVN Server\bin\htpasswd.exe" -b '.$passwdfile." ".$username." ".$newpass; system($command, $result); if ($result==0) &#123; $msg_succ="用户[".$username."]密码修改成功，请用新密码登陆."; &#125; else &#123; $msg="用户[".$username."]密码修改失败，返回值为".$result."，请和管理员联系！"; &#125;&#125;if (isset($msg_succ)) &#123;?&gt;&lt;script language="javaScript"&gt;&lt;!--alert("&lt;?php echo $msg_succ?&gt;");window.location.href="/"//--&gt;&lt;/script&gt;&lt;?php&#125; else if (isset($msg)) &#123;?&gt;&lt;script language="javaScript"&gt;&lt;!--alert("&lt;?php echo $msg?&gt;");window.location.href="&lt;?php echo $_SERVER["PHP_SELF"]?&gt;"//--&gt;&lt;/script&gt;&lt;?php&#125;?&gt;&lt;/body&gt;&lt;/html&gt; 在svn首页增加修改密码入口修改VisualSVN Server\WebUI\index.html，在页面底部增加修改密码的链接： 1234&lt;footer&gt;Powered by &lt;a href="http://www.visualsvn.com/server/"&gt;VisualSVN Server&lt;/a&gt;. &amp;copy; 2005-2016 VisualSVN Limited.&lt;br /&gt;&lt;br /&gt;&lt;a href="/pw"&gt;自助修改密码&lt;/a&gt;&lt;/footer&gt; 在footer中增加自助修改密码的链接就可以。 参考文档VisualSVN Server 增加自助修改密码页面]]></content>
+      <tags>
+        <tag>svn</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[BIND对含下划线域名解析问题]]></title>
+    <url>%2F2017%2F06%2F06%2FBIND%E5%AF%B9%E4%B8%8B%E5%88%92%E7%BA%BF%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E9%97%AE%E9%A2%98%2F</url>
+    <content type="text"><![CDATA[BIND目前版本默认不支持对含下划线域名的解析，可以调整部分参数来使其支持对含下划线域名解析。关于域名是否可以包含下划线问题，网上有各种讨论，涉及到DNS、domain、FQDN、hostname等等名词，这里仅介绍如何修改BIND。默认情况下，如果配置了带下划线域名，使用rndc reload是可以成功的，但并不能正常解析，使用systemctl restart named，会导致服务启动失败，使用named-checkzone zone xxx.com检查zone文件时，也会报bad owner name (check-names)之类的错误，都是因为包含了带下划线域名。有两个办法可以解决这个问题，使BIND能够解析带下划线域名： 在/etc/resolv.conf加入options no-check-names 主配置域中添加check-names ignore参数： 12345zone &quot;xxx.com&quot; &#123; type master; file &quot;/var/named/xxx.com&quot;; check-names ignore;&#125;; 参考文档让Linux bind支持带下划线域名的解析Why are underscores not allowed in DNS host names?Can (domain name) subdomains have an underscore “_” in it?]]></content>
+      <tags>
+        <tag>ops</tag>
+        <tag>DNS</tag>
+        <tag>BIND</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[CentOS 7下搭建Cacti监控系统]]></title>
+    <url>%2F2017%2F06%2F03%2FCentOS%207%E4%B8%8B%E6%90%AD%E5%BB%BACacti%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F%2F</url>
+    <content type="text"><![CDATA[和zabbix和nagios相比，cacti偏重于主机和流量的监控，在流量监控部分会往往会采用cacti。cacti是一个基于lamp的应用，在安装配置cacti之前需要配置好lamp环境。 基本概念cacti是用php语言实现的一个软件，它的主要功能是用snmp服务获取数据，然后用rrdtool储存和更新数据，当用户需要查看数据的时候用rrdtool生成图表呈现给用户。因此，snmp和rrdtool是cacti的关键。Snmp关系着数据的收集，rrdtool关系着数据存储和图表的生成。Mysql配合PHP程序存储一些变量数据并对变量数据进行调用，如：主机名、主机ip、snmp团体名、端口号、模板信息等变量。snmp抓到数据不是存储在mysql中，而是存在rrdtool生成的rrd文件中（在cacti根目录的rra文件夹下）。rrdtool对数据的更新和存储就是对rrd文件的处理，rrd文件是大小固定的档案文件（Round Robin Archive），它能够存储的数据笔数在创建时就已经定义。关于RRDTool的知识请参阅RRDTool教学。 安装配置lamp安装lamp及其他相关工具包1234567yum install httpd* ----安装Web服务器Apache相关服务yum install php* ----安装PHP相关服务yum install mariadb* ----安装MariaDB数据库相关服务yum install net-snmp* ----安装SNMP相关服务yum install rrdtool rrdtool-devel rrdtool-php rrdtool-perl ----安装rrdtool以生成图像yum install gd gd-devel php-gd ---rrdtool绘制图像需要的图形库2 Apache和PHP服务本身默认即可使用，如有其他需要，可自行调整相关配置。 配置snmpvim /etc/snmp/snmpd.confg将41行（各有不同，请自行查找）下的default更改为127.0.0.1将62行（各有不同，请自行查找）下的systemview更改为all将85行（各有不同，请自行查找）下的#注释掉 配置mariadb数据库12345678910111213# 启动数据库服务systemctl start mariadb.service# 连接数据库，密码为空mysql -uroot -p# 设置数据库root密码，修改登录权限MariaDB [(none)]&gt; use mysql;MariaDB [mysql]&gt; update user set password=password( 'wang') where user='root';MariaDB [mysql]&gt;grant all privileges on *.* to root@localhost identified by ‘wang’ with grant option;MariaDB [mysql]&gt;flush privileges;# 添加cacti用户和cacti数据库，设置相关权限MariaDB [mysql]&gt;create database cacti default character set utf8; ##数据库字符集设置utf8，否则乱码MariaDB [mysql]&gt;grant all privileges on cacti.* to cacti@localhost identified by ‘cacti’ with grant option;MariaDB [mysql]&gt;flush privileges; 系统环境确认 确保lamp相关服务正确安装、启动，做好相关服务的开机启动； 确保系统时间正常，cacti依赖时间服务，时间不同步会带来很多异常； 确保系统防火墙关闭，或调整系统防火墙开放cacti端口（默认为80）； 安装配置cacti 从github上下载到最新的release：https://github.com/Cacti/cacti/releases解压并移动到httpd目录下: 12tar -zxvf cacti-version.tar.gzmv cacti /var/www/html/cacti 将cacti的表导入到之前创建的数据库中： 12cd /var/www/html/cacti mysql -ucacti -pcacti cacti &lt; /var/www/html/cacti/cacti.sql 配置cacti相关的php文件12345678vim /var/www/html/cacti/include/config.php#修改如下$database_type = "mysql";$database_default = "cacti";$database_hostname = "localhost";$database_username = "cactiuser"; //因为我们先前在数据库建的是 "cacti" 用户，所以这里默认的 "cactiuser" 要改为 "cacti"$database_password = "cactiuser"; //这里默认的密码我们也要改为 "cacti"$database_port = "3306"; 如果不存在该文件，在同目录下找到config.php.dist文件复制一份即可。global.php修改同上。 增加cacti用户用来写入rrd和log目录 123useradd cacticd /var/www/html/cactichown -R cacti rra/ log/ 添加计划任务用于采集数据，生成图表 12crontab -e*/5 * * * * php /var/www/html/cacti/poller.php &gt; /dev/null 2&gt;&amp;1 启动httpd服务，访问http://ip/cacti，进入cacti的web安装配置界面web界面提示较为详细，根据提示安装仍缺失的插件，按照安装向导最终完成安装。web安装向导会检查安装环境，一般情况下会出现数据库时区设置、PHP模块缺失、数据库字符集及性能配置等问题。常见问题可参考troubleshooting部分内容。 TroubleShooting无法访问http://ip/cacti问题访问http://ip/cacti出现：12Forbidden You don't have permission to access /cacti on this server. 一般是因为开启了SELinux导致的权限问题，可以搜索研究SELinux下的权限控制问题或直接关闭SELinux。123456789# 查看SELinux状态/usr/sbin/sestatus -v# 关闭SELinux## 临时关闭，不用重启setenforce 0 //关闭setenforce 1 //开启## 永久关闭，需重启vi /etc/selinux/configSELINUX=enforcing 修改为 SELINUX=disable 统计图字体乱码问题一般是中文字体乱码，原因可能为rrdtool调用字体失败，安装字体，刷新缓存即可。1234# 安装字体yum -y install cjkuni-ukai-fonts# 刷新字体缓存fc-cache -f -v 刷新统计图，应该可以恢复正常。 有图无数据问题原因比较多，可以查看/var/www/html/cacti/log目录下的log文件，获取更详细信息。 系统时间错误系统时间不一致，导致定时任务执行异常，调整系统时间，重新生成图像。 123cd /var/www/html/cacti/rrarm -rf ./*/usr/bin/php /var/www/html/cacti/poller.php -force 相关目录权限异常一般涉及两个目录cacti主目录下的rra/和log/目录，需要确保对httpd和crond进程的用户可读写，可以简单的改为777来使用。 12chmod 777 -R rra/chmod 777 -R log/ snmp未采集到数据问题通过snmpwalk工具验证对目标主机的数据采集是否正常。 1234# 验证目标主机是否开启snmp服务snmpwalk -v 2c -c public ServerIP if# 验证是否能采集到目标主机的CPU负载信息snmpwalk -v 2c ServerIP -c public .1.3.6.1.4.1.2021.10.1.3 MariaDB字符集和性能配置问题在cacti的web安装配置界面，可能会检测到MariaDB的字符集异常，会对后面的中文使用产生问题。默认的一些配置可能会影响cacti的性能，需要调整。修改数据库配置文件，在[mysqld]部分添加如下内容：123456789101112131415161718vi /etc/my.cnf# 调整字符集[mysqld]init_connect='SET collation_connection = utf8_general_ci'init_connect='SET NAMES utf8'character-set-server=utf8collation-server=utf8_general_ciskip-character-set-client-handshake# 调整应用配置max_heap_table_size=64Mtmp_table_size=64Mjoin_buffer_size=64Mmax_allowed_packet=20000000innodb_file_per_table=oninnodb_buffer_pool_size=256Minnodb_doublewrite=oninnodb_additional_mem_pool_size=128Minnodb_flush_log_at_trx_commit=2 数据库时区设置问题初次登录cacti的web安装页面，可能会出现如下错误提示：1ERROR:Your Cacti database login account does not have access to the MySQL TimeZone database. Please provide the Cacti database account “select” access to the “time_zone_name” table in the “mysql” database, and populate MySQL’s TimeZone information before proceeding. 使用以下命令处理：1mysql&gt; GRANT SELECT ON mysql.time_zone_name TO cactiuser@localhost IDENTIFIED BY 'cacti' 或者可能能有以下错误提示：1ERROR: Your MySQL TimeZone database is not populated. Please populate this database before proceeding. 使用以下命令处理：1mysql_tzinfo_to_sql /usr/share/zoneinfo/ | mysql -u root -p mysql ​]]></content>
+      <tags>
+        <tag>ops</tag>
+        <tag>cacti</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[CentOS7下使用BIND搭建DNS服务器]]></title>
+    <url>%2F2017%2F06%2F02%2FCentOS%E4%B8%8B%E4%BD%BF%E7%94%A8BIND%E6%90%AD%E5%BB%BADNS%E6%9C%8D%E5%8A%A1%E5%99%A8%2F</url>
+    <content type="text"><![CDATA[BIND(Berkeley internet Name Daemon)也叫做NAMED，是使用最为广泛的一个DNS服务器程序。这里对CentOS 7下的安装配置做些记录和说明。 安装BIND基本环境： CentOS Linux release 7.3.1611 (Core) BIND 9.9.4-RedHat-9.9.4-38.el7_3.3 (Extended Support Version) 直接使用yum进行安装：1yum install bind 启动named服务：123systemctl start named# 如果有需要，使能named开机启动systemctl enable named 配置BINDnamed的主配置文件为/etc/named，这个文件中可以include其它配置文件和指定不同域的配置文件。主配置文件使用类似C/C++风格的语法，注释用//或/* */。结构如下所示：123456789101112131415161718192021222324252627282930313233343536373839404142options &#123; listen-on port 53 &#123; any; &#125;; listen-on-v6 port 53 &#123; ::1; &#125;; directory &quot;/var/named&quot;; //指定存放区域文件的根目录，下面给出相对路径的都是相对此目录 dump-file &quot;/var/named/data/cache_dump.db&quot;; statistics-file &quot;/var/named/data/named_stats.txt&quot;; memstatistics-file &quot;/var/named/data/named_mem_stats.txt&quot;; allow-query &#123; any; &#125;; //允许哪些主机查询 recursion yes; //是否允许递归查询 dnssec-enable no; dnssec-validation no; bindkeys-file &quot;/etc/named.iscdlv.key&quot;; managed-keys-directory &quot;/var/named/dynamic&quot;; pid-file &quot;/run/named/named.pid&quot;; session-keyfile &quot;/run/named/session.key&quot;;&#125;;logging &#123; //定义日志 channel default_debug &#123; file &quot;data/named.run&quot;; severity dynamic; &#125;;&#125;;zone &quot;.&quot; IN &#123; //定义根区域文件名称 type hint; file &quot;named.ca&quot;; //根区域文件，使用的是相对路径&#125;;zone &quot;xxx.com&quot; &#123; //其它自定义区域文件 type master; file &quot;/var/named/xxx.com&quot;; //使用绝对路径&#125;;include &quot;/etc/named.rfc1912.zones&quot;; //定义区域配置文件include &quot;/etc/named.root.key&quot;; //根区域的key文件，与事务签名相关 配置文件默认只监听127.0.0.1且只允许localhost查询，如果要对外提供DNS服务即允许远端查询，需调整如下字段值：1234# 监听的所有地址listen-on port 53 &#123; any; &#125;;# 允许所有查询请求allow-query &#123; any; &#125;; 配置完成后，重启named服务，测试验证DNS服务是否有效。 增加域名如果要增加本地解析域名，需要在/etc/named.conf中添加指定的域名，格式如下：1234zone &quot;xxx.com&quot; &#123; type master; file &quot;/var/named/xxx.com&quot;;&#125;; 增加了xxx.com域，指定了该域名的配置文件。在指定的目录中创建相关文件，可以以/var/named/named.empty文件为模板，做自定义修改。1234567891011121314$TTL 3H@ IN SOA @ xxx.com. ( 0 ; serial 1D ; refresh 1H ; retry 1W ; expire 3H ) ; minimum NS @ A 127.0.0.1 AAAA ::1admin IN A 172.16.0.134bbs IN A 172.16.0.138 包含主域和两个二级域名的A记录，其他配置可自行查看文档。配置完成，重启named服务。 验证配置使用nslookup测试公网域名及自定义域名是否可以正确解析。12345678910111213141516171819202122hi@hi-Ubuntu:~$ nslookup baidu.com 172.16.0.252Server: 172.16.0.252Address: 172.16.0.252#53Non-authoritative answer:Name: baidu.comAddress: 123.125.114.144Name: baidu.comAddress: 180.149.132.47Name: baidu.comAddress: 220.181.57.217Name: baidu.comAddress: 111.13.101.208hi@hi-Ubuntu:~$ nslookup admin.xxx.com 172.16.0.252Server: 172.16.0.252Address: 172.16.0.252#53Name: admin.xxx.comAddress: 172.16.0.134hi@hi-Ubuntu:~$ TroubleShooting server can’t find xxx.com : SERVFAIL异常问题在测试解析自定义域名时可能会出现该问题，一般原因为自定义域名配置文件权限异常，named进程无法读取该配置文件。一般情况下，named进程由named用户启动，修改域名配置文件为named用户即可：1chown named xxx.com]]></content>
+      <tags>
+        <tag>ops</tag>
+        <tag>dns</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[cacti基本使用]]></title>
+    <url>%2F2017%2F06%2F02%2Fcacti%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%2F</url>
+    <content type="text"><![CDATA[简单说明cacti的基本使用，确保安装完成后，能绘制出一张可用的流量图。不同版本的cacti在操作上可能会有些差异，这里以1.1.7版本为例说明。 添加设备登录之后，可以看到cacti有四个主标签页，基本使用只需要关注控制台和图形两个标签页即可。首先我们需要添加一个设备，打开控制台-管理-设备-添加，开始添加设备。在设备添加页面，重点需要关注主机名称和SNMP相关配置信息，这关系到向谁采集数据以及能否采集到数据的问题。 创建图形正常添加设备后就可以创建图形了，打开控制台-创建-新图形，选中需要绘图的设备和条目（比如端口流量），在右下角下拉菜单选择合适的图形模板，比如端口流量一般选择I/O bits 64的模板。创建成功后，在控制台-管理-图形目录下可以找到刚刚创建的图形，点击名称打开后，可以初步查看绘图情况。这部分可能会有延时，一般会在5到10分钟内出图。 创建图形树展示图形创建后并不会在最顶层的图形标签页中展示，还需要手动创建图形树，把想要展示的图形添加到图形树中发布出去，然后就可以在图形标签页中看到想要的图形。打开控制条-管理-Trees，点击左上角的添加，开始添加一个图形树。添加图形树比较简单，仅配置一个名字即可，排序方式按默认。创建完图形树后，在Trees根目录下点击图形树名称，开始向里面添加之前创建的图形： 图形树默认是锁定的，不可编辑。点击edit tree，开始编辑图形树。拖拽需要的图形或设备模板到tree items下即可。编辑完成，点击保存，finish editing tree。回到图形标签页，即能查看到刚刚添加的图形。]]></content>
+      <tags>
+        <tag>ops</tag>
+        <tag>cacti</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[搭建KMS服务]]></title>
+    <url>%2F2017%2F05%2F29%2F%E6%90%AD%E5%BB%BAKMS%E6%9C%8D%E5%8A%A1%2F</url>
+    <content type="text"><![CDATA[KMS是Windows和Office相关产品的激活服务，借助一个Python版本的实现，我们可以很方便的搭建一个KMS服务，用于激活相关产品。 搭建KMS服务使用py-kms来搭建，GitHub仓库地址为：https://github.com/myanaloglife/py-kms12345678910# Clone到本地git clone https://github.com/myanaloglife/py-kms.git# 运行cd py-kmspython server.py# 显示以下信息即运行成功TCP server listening at 0.0.0.0 on port 1688. 激活相关产品以Windows Server 2008 R2为例，激活步骤为输入序列号、变更KMS服务器地址、激活、验证。12345# 以管理员权限运行cmd或PowerShellslmgr /ipk 序列号slmgr /skms kms服务器地址slmgr /atoslmgr /dlv 部分产品序列号12345678910111213141516171819202122232425262728293031323334353637383940414243444546Windows Server 2012 Datacenter: 48HP8-DN98B-MYWDG-T2DCC-8W83PWindows Server 2012 Datacenter Core: 48HP8-DN98B-MYWDG-T2DCC-8W83PWindows Server 2012 Standard: XC9B7-NBPP2-83J2H-RHMBY-92BT4Windows Server 2012 Standard Core: XC9B7-NBPP2-83J2H-RHMBY-92BT4Windows Server 2012 MultiPoint Standard:HM7DN-YVMH3-46JC3-XYTG7-CYQJJWindows Server 2012 MultiPoint Premium: XNH6W-2V9GX-RGJ4K-Y8X6F-QGJ2GWindows 8 Enterprise: 32JNW-9KQ84-P47T8-D8GGY-CWCK7Windows 8 Enterprise N: JMNMF-RHW7P-DMY6X-RF3DR-X2BQTWindows 8 Professional: NG4HW-VH26C-733KW-K6F98-J8CK4Windows 8 Professional N: XCVCF-2NXM9-723PB-MHCB7-2RYQQWindows 8 Core: BN3D2-R7TKB-3YPBD-8DRP2-27GG4Windows 8 Core N: 8N2M2-HWPGY-7PGT9-HGDD8-GVGGYWindows 8 Core Single Language: 2WN2H-YGCQR-KFX6K-CD6TF-84YXQWindows 8 Core Country Specific: 4K36P-JN4VD-GDC6V-KDT89-DYFKPWindows Server 2008 R2 Datacenter: 74YFP-3QFB3-KQT8W-PMXWJ-7M648Windows Server 2008 R2 Itanium: GT63C-RJFQ3-4GMB6-BRFB9-CB83VWindows Server 2008 R2 Enterprise: 489J6-VHDMP-X63PK-3K798-CPX3YWindows Server 2008 R2 Standard: YC6KT-GKW9T-YTKYR-T4X34-R7VHCWindows Server 2008 R2 Web: 6TPJF-RBVHG-WBW2R-86QPH-6RTM4Windows Server 2008 R2 HPC edition: TT8MH-CG224-D3D7Q-498W2-9QCTXWindows Server 2008 R2 (Itanium): GT63C-RJFQ3-4GMB6-BRFB9-CB83VWindows Web Server 2008 R2: 6TPJF-RBVHG-WBW2R-86QPH-6RTM4Windows 7 Enterprise: 33PXH-7Y6KF-2VJC9-XBBR8-HVTHHWindows 7 Enterprise N: YDRBP-3D83W-TY26F-D46B2-XCKRJWindows 7 Enterprise E: C29WB-22CC8-VJ326-GHFJW-H9DH4Windows 7 Professional: FJ82H-XT6CR-J8D7P-XQJJ2-GPDD4Windows 7 Professional N: MRPKT-YTG23-K7D7T-X2JMM-QY7MGWindows 7 Professional E: W82YF-2Q76Y-63HXB-FGJG9-GF7QXWindows Server 2008 Datacenter: 7M67G-PC374-GR742-YH8V4-TCBY3Windows Server 2008 (Itanium): 4DWFP-JF3DJ-B7DTH-78FJB-PDRHKWindows Server 2008 Enterprise: YQGMW-MPWTJ-34KDK-48M3W-X4Q6VWindows Server 2008 Standard: M24T-X9RMF-VWXK6-X8JC9-BFGM2Windows Server 2008 HPC edition: RCTX3-KWVHP-BR6TB-RB6DM-6X7HPWindows Server 2008 (Itanium): 4DWFP-JF3DJ-B7DTH-78FJB-PDRHKWindows Web Server 2008: WYR28-R7TFJ-3X2YQ-YCY4H-M249DWindows Vista Enterprise: VKK3X-68KWM-X2YGT-QR4M6-4BWMVWindows Vista Enterprise N: VTC42-BM838-43QHV-84HX6-XJXKVWindows Vista Business: YFKBB-PQJJV-G996G-VWGXY-2V3X8Windows Vista Business N: HMBQG-8H2RH-C77VX-27R82-VMQBTOffice Professional Plus 2010: VYBBJ-TRJPB-QFQRF-QFT4D-H3GVBOffice Standard 2010: V7QKV-4XVVR-XYV4D-F7DFM-8R6BMOffice Home &amp; Business 2010: D6QFG-VBYP2-XQHM7-J97RH-WRCKOffice Professional Plus 2013: YC7DK-G2NP3-2QQC3-J6H88-GVGXTOffice Standard 2013: KBKQT-2NMXY-JJWGP-M62JB-92CD4Project Professional 2013: FN8TT-7WMH6-2D4X9-M337T-2342KVisio Professional 2013: C2FG9-N6J68-H8BTJ-BW3QX-RM3B3]]></content>
+      <tags>
+        <tag>Windows</tag>
+        <tag>KMS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[基于Windows 2008的DC服务器搭建]]></title>
+    <url>%2F2017%2F05%2F28%2FWindows-DC-Server%2F</url>
+    <content type="text"><![CDATA[windows办公环境中，处于管理需要，往往会使用AD域来进行控制，AD域的核心在于DC服务器的搭建。 安装准备 安装环境为Windows Server 2008 R2 修改DC服务器计算机名为了便于识别和管理，建议在配置DC服务器前修改服务器名称。配置DC服务器后也可以修改，但相对繁琐。 手动配置服务器IPDC服务器需要使用静态IP配置，请结合具体的网络拓扑，合理分配IP地址。 数据规划 需提前规划好域名及相关密码。如果有特殊需求，在部署前需考虑整个域的架构以及配套DNS服务器的部署情况。一般小规模环境中使用单域林单域树单域的架构，并且DC和DNS部署在一台服务器上即可满足使用。 安装配置DC服务器 打开服务器管理器,使用添加角色功能,启动添加角色向导. 勾选AD域服务，同时需安装.NET Framework。 部分提示信息，直接下一步后，安装即可。 安装成功后，关闭添加角色向导或者点击关闭向导，启动dcpromo,开始DC配置。 打开AD域服务安装向导，开始DC配置，警告部分不用考虑，下一步。 注意，如果是内网中第一台DC服务器，要选择在新林中新建域. 命名新林中的根域域名，一般为xxx.com的形式。该部分数据需规划好，因为配置完成后更改根域名称非常繁琐。 注意选择林功能级别,选定指定级别后则该林中不能添加低于该级别的DC服务器。 DC需要配合DNS服务，下一步验证通过后，会进入DNS配置部分。 一般情况下，不需要指定DNS委派，直接下一步即可。 AD数据存储部分，根据情况调整，简单环境默认即可。 创建目录还原模式密码，供紧急情况使用。 检查配置项，确认无问题后下一步开始安装。 安装完成，可能需重启计算机生效。 AD域基本使用借助管理工具中的AD用户和计算机工具可以方便的对AD域进行基本管理。 创建组织单位 创建域账户 加入域首先调整主机DNS配置，确认主机可以正确解析该域域名，确保主机和DC通信正常，这是主机加入域的基础。需要域管理员的用户名密码：加入成功：重启计算机后生效。加入域的计算机会有本地账户和域账户的区分，在登录时使用计算机名\用户名的形式登录本地账户，使用用户名@域名的形式登录域账户。 典型应用参考基于AD域的打印机部署 首先确保打印机是共享的，在域内可以被其他成员和DC访问.打开管理工具\打印管理,选择待部署的打印机，使用组策略部署。 选择要使用的组策略对象，根据需要，默认选择对整个域生效的组策略： 注意将组策略应用到计算机和用户的区别，应用的计算机是对域内所有计算机生效，一般在计算机重启时安装；应用到用户是对域内用户生效，用户在域内任何计算机登录时均会应用该组策略。 验证是否生效：在DC服务器上使用更新命令，确保刚刚配置的组策略立即生效： 1gpupdate /force 在成员主机上注销域账户，重新登录，策略正常生效则会在设备和打印机中看到刚刚发布的打印机。 基于AD域的软件分发一般情况下AD域支持对.msi后缀软件分发，不支持.exe后缀。.exe后缀软件的分发会通过脚本或重新打包进行，后面可单独讨论该问题。 首先在DC服务器上创建共享目录，作为分发软件的挂载点，所有待分发软件均放到该目录下并确保域内其他计算机可以访问，否则分发会失败。 打开开始-管理工具-组策略管理-组策略对象-新建,新建一个软件分发的组策略对象： 双击\编辑新建的组策略对象，进入组策略管理编辑器,依次展开用户配置-策略-软件设置-软件安装-新建-数据包,创建一个新的安装包：在选择软件包时注意不要选择本地路径，要选择网络路径，即之前共享的网络路径。选择软件的部署方式，已发布的软件不会直接安装到成员计算机上，会在添加删除程序界面显示，由用户决定是否安装；已分配的软件会自动安装到成员计算机上。 完成组策略对象编辑后，回到组策略管理，选择需要部署软件的组织，链接到现有GPO：选择刚刚创建编辑的GPO 使用gpupdate /force,使刚刚的组策略更改立即生效。在其它成员计算机上验证结果，注销后登陆，在添加删除程序中可以查看到已发布的软件。完成。分配方式和发布方式部署过程一致，会在计算机开机时自动安装软件，不再详述。 其它问题 在不考虑成本情况下，可考虑选择较新系统来部署AD域，系统的安全和性能都会有提升。 DC作为域内核心节点需考虑单节点故障问题，可考虑Windows的故障转移群集，使用多台DC做主备，以实现高可用。多台DC问题相对复杂，可能需进一步研究探讨。 多系统环境应用。除了Windows外，AD域中可能会存在多种操作系统，比如主流的Linux和macOS。目前不是重点，待有需求时进一步研究处理。]]></content>
+      <tags>
+        <tag>Windows</tag>
+        <tag>AD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Wireshark远程抓包]]></title>
+    <url>%2F2017%2F05%2F06%2FWireshark%E8%BF%9C%E7%A8%8B%E6%8A%93%E5%8C%85%2F</url>
+    <content type="text"><![CDATA[在远程维护时可能会遇到需要在远程主机实时抓包分析的场景,可能远程主机不太方便安装抓包工具或对相关端口做流量镜像,Linux系统中的tcpdump则在分析数据时不太方便,这个时候就要考虑Wireshark的远程抓包功能了. Wireshark在1.2版本后开始支持远程抓包功能. 一般我们是在Windows主机中使用Wireshark来分析远端主机流量,Wireshark的Windows版是基于WinPcap来抓包的,WinPcap工具包中的rpcapd使其可以远程捕获流量,在远端主机安装运行rpcapd工具后,就可以捕获流量并返回给本地客户端,详细原理和使用方法可以参考WinPcap官方中文文档.关于rpcapd工具的安装,Windows下直接在WinPcap官网下载安装WinPcap即可,Linux下可能需手动编译rpcapd工具. 编译安装rpcapd编译rpcapd需要libpcap源码,源码可以从WinPcap源码包中找到,也可以在tcpdump官网上下载到,或者直接拉取libpcap的GitHub仓库.后两个源码编译方法可能和以下不一致.12345678wget https://www.winpcap.org/install/bin/WpcapSrc_4_1_3.zipunzip WpcapSrc_4_1_3.zipcd winpcap/wpcap/libpcap/chmod +x ./configure./configurecd rpcapdmake 简单使用rpcapd 普通进程模式:./rpcapd -n守护进程模式:./rpcapd -d常用参数:123-n 不启用认证功能,任何主机都可以访问rpcapd-d 守护进程模式-p 8888 指定rpcapd在8888端口监听,不使用该参数默认端口为2002 注意:rpcapd需要root权限执行,否则无法建立socket 本地Wireshark连接到远端rpcapd 在Wireshark里添加远程接口即可实时分析远端主机流量,依次打开捕获-选项-管理接口-远程接口-+(添加)填写远端主机IP\端口及认证信息(如果有),正确添加远程接口后就可以像分析本地接口流量一样分析远端主机接口流量. TroubleShooting 缺少flex组件./configure报错12configure: error: Your operating system&apos;s lex is insufficient to compile libpcap. flex is a lex replacement that has many advantages, including being able to compile libpcap. For more information, see http://www.gnu.org/software/flex/flex.html . 安装flex解决:apt install flex]]></content>
+      <tags>
+        <tag>network</tag>
+        <tag>Wireshark</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[SSH使用备忘]]></title>
+    <url>%2F2017%2F03%2F16%2FSSH%E4%BD%BF%E7%94%A8%E5%A4%87%E5%BF%98%2F</url>
+    <content type="text"><![CDATA[ssh的上手比较简单，一般情况下也够用了。但翻看man page可以看到，ssh不管是服务端还是客户端，都有很多配置参数可以使用。这里记录一下工作中偶尔用到的的用法，供备忘查询。这里说的ssh是指openssh这个工具。 关闭主机密钥检查ssh的默认安全策略，连接远端主机时会检查远端主机密钥。密钥存在于know_hosts文件中，则允许连接；密钥不存在，则提示是否连接。如果安全级别较低，可以关闭这个主机密钥检查，在自动登录场景中可能会用到。1ssh -o StrictHostKeyChecking=no root@1.1.1.1 也可以在ssh_config文件中配置这个选项为no。 限制ssh登录用户使用的命令类似于跳板机场景，可能只希望跳板用户仅使用ssh命令跳转，不能对跳板机进行其它操作。ssh通过限制指定密钥用户可使用的命令实现。在authorized_keys文件指定密钥前添加如下：1command="bash --restricted --noprofile --rcfile $HOME/.stricted_profile" ssh-rsa ...... 这句话的作用是使用restricted模式，并且不加载系统默认的profile文件，而加载我们定义的profile文$HOME/.stricted_profile。在.stricted_profile文件中定义相关环境变量及可使用的程序：123456# 编辑 $HOME/.stricted_profile文件PATH=$&#123;HOME&#125;/binexport PATH# 添加可执行的命令mkdir $HOME/binln -s /usr/bin/ssh $HOME/bin/ 以上，就限制了登录用户仅能使用ssh命令，但只有使用该必要登录的用户受限。使用密码登录的用户不受限制，也许使用Linux的用户权限控制是个更完备的方法。]]></content>
+      <tags>
+        <tag>ops</tag>
+        <tag>ssh</tag>
+        <tag>openssh</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Linux下挂载访问Windows共享目录]]></title>
+    <url>%2F2017%2F03%2F05%2FLinux%E4%B8%8B%E6%8C%82%E8%BD%BD%E8%AE%BF%E9%97%AEWindows%E5%85%B1%E4%BA%AB%E7%9B%AE%E5%BD%95%2F</url>
+    <content type="text"><![CDATA[快速上手示例1sudo mount -t cifs //gcstation/gcs_share0 /home/hi/lan_storage/gcs_share0 -o username=share,rw,dir_mode=0777,file_mode=0777,uid=hi,gid=hi 基本语法为：1mount -t cifs //Windows主机IP或名字/共享目录路径 指定本机目录作为挂载点 -o 选项参数 需要关注的主要是-o选项参数，参数一般是key=value的形式，不同的参数以,分割，参数详细解释可以查看man手册man mount.cifs。根据内核加载的cifs模块，可能会有不同的选项参数。常用参数简单介绍如下： username=arg可以访问Windows共享的用户名，有些版本的cifs内核模块也接受user作为key。不设置的话，会使用环境变量中的USER。 password=arg用户密码。不设置的话使用环境变量PASSWD。不使用该选项，则会在挂载是提示输入密码。如果密码包含特殊字符，如逗号分隔符,，则直接设置密码会出错。同样的密码，在环境变量PASSWD、密码文件或提示输入中可以正常使用。 credentials=filename设置一个包含用户名、密码、工作组（域）的文件，文件格式如下： 123username=valuepassword=valuedomain=value ro挂载为只读 rw挂载为读写 dir_mode=挂载后的目录权限 file_mode=挂载后的文件权限 uid=arg设置挂载后文件及目录的归属用户，uid可是是用户名形式也可以是数字形式。 gid=arg同上，设置挂载后文件及目录的归属用户组。 开机自动挂载修改/etc/fstab,添加需要挂载的条目如下:1//gcstation/gcs_share0 /home/hi/lan_storage/gcs_share0 cifs credentials=/home/hi/.cifs/credentials,uid=hi,gid=hi,dir_mode=0777,file_mode=0777 0 0 进阶使用补充以上为常用场景的简单使用，下面记录一些其他场景使用情况，基本就是对不常用参数的一些解释。 setuids如果CIFS Unix extensions协商成功，在挂载目录上创建的目录和文件将会使用创建进程的uid和gid，这个是符合我们本地文件系统的使用习惯的。如果没有协商成功，则新建的目录和文件均会使用挂载用户的uid和gid，即任何用户在挂载目录上新建文件都会归属于挂载用户和组，这个并不符合我们使用本地文件系统的习惯。 nosetuids如果CIFS Unix extensions协商成功，客户端在新建文件时不会设置uid和gid而是由服务端设置（通常是挂载用户的uid）。如果协商不成功，则新建文件的uid会设置为挂载用户的uid或者是挂载时指定的uid参数。 noperm客户端不做权限检查，即任何用户均可在挂载目录上读写。 nounix对本次挂载关闭CIFS Unix Extensions功能。]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>windows</tag>
+        <tag>cifs</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[在nohup后面使用for循环语句]]></title>
+    <url>%2F2017%2F01%2F23%2Fnohup-for-loop%2F</url>
+    <content type="text"><![CDATA[nohup是用来在后台执行命令的，一般简单的命令直接执行，复杂点的写一个脚本后使用nohup调用脚本在后台执行。在简单调试时，准备使用nohup执行一个for语句，怎么也执行不了，搜索学习了一些资料，原来nohup后面只能是一个单语句的参数，要执行复杂多语句可能需自己构建一个shell环境。资料来自网络，如果是for语句，可以这么写： nohup sh -c 'for i in `seq 10`;do echo hh &gt;&gt; hh.test;sleep 1;done &gt;/dev/null 2&gt;&amp;1' &amp; 整个多语句循环体在sh -c &#39;&#39;里面，作为一个整体参数传递给nohup，这样就实现了nohup后台执行多语句了。 参考文档Why can’t I use Unix Nohup with Bash For-loop?]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>shell</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[使用Python处理Excel表格文件——openpyxl使用笔记]]></title>
+    <url>%2F2017%2F01%2F17%2Fopenpyxl-notes%2F</url>
+    <content type="text"><![CDATA[为了提高工作效率，常常需借助Python对Excel文件进行一些处理，Python中有很多库可以实现对Excel文件的处理，区分在于支持的Excel版本及可处理的元素（如图表等）。这里记录使用openpyxl这个库的简单例子，该库仅支持对xlsx格式文件的读写处理，可满足简单的上手使用，详细API文档可参考官方文档。 读取和创建xlsx文件12345678910111213141516171819202122from openpyxl import Workbook# 读取一个已存在的xlsx文件wb = Workbook('./test.xlsx')# 新建一个xlsx文件wb = Workbook()# 保存xlsx文件wb.save('./new.xlsx')# 获取一个sheet对象，默认Workbook对象的active返回第一个sheet页ws = wb.active# 使用sheet页名字获取一个sheet对象ws = wb["mysheet"]# 查看所有sheet页名称print wb.sheetamesprint wb.get_sheet_names()# 新增一个sheet页ws = wb.create_sheet("mysheet")# 在第一个sheet页前插入一个新的sheet页ws = wb.create_sheet("mysheet", 0)# 更改sheet页名字ws.title = "new title"# 更改sheet页名字背景色，默认白色ws.sheet_properties.tabColor = "1072BA" wb.save操作会直接覆盖已存在的文件而不产生警告信息，在保存时需注意确认文件是否已存在。 数据操作12345678910111213# 通过sheet对象的key来读写单元格的值，单元格不存在则会创建a = ws['A1']ws['A1'] = 9527# 通过行列序号来读写单元格的值，序号从1开始b = ws.cell(row=4, column=2).valuews.cell(row=5, column=5, value=10)ws.cell(row=5, column=5).value = 10# 单元格区域cell_range = ws['A1':'D2']column_C = ws['C']col_range = ws['D':'F']row_10 = ws[10]row_range = ws[5:10] 当一个sheet对象在内存中被创建时不包括任何单元格，所有单元格在第一次被访问时自动创建，不管是否被赋值。 12345678910# 使用for循环迭代每一行或每一列的单元格for row in ws.iter_rows(): for cell in row: print cell.valuefor col in ws.iter_cols(): for cell in col: print cell.value# 按行或按列构建可迭代的元组tuple(ws.rows)tuple(ws.columns) 参考文档openpyxl - A Python library to read/write Excel 2010 xlsx/xlsm files]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>openpyxl</tag>
+        <tag>excel</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[在Word中使用VBA实现带有递增序号的替换]]></title>
+    <url>%2F2017%2F01%2F13%2Fword-replacement-index%2F</url>
+    <content type="text"><![CDATA[最近需要在Word中替换字符串的时候在每一次替换时动态的加上一个序号，表示是第几次替换。在网上查了很多资料，原来Word中的替换时支持正则表达式的，但递增序号这类类似计算性的工作，正则表达式很难实现。最后，找到一段使用VBA来实现这个功能的代码，测试有效，记录之。VBA代码比较简单，如下：12345678910111213Sub replace1()Dim nIndex As IntegerSelection.HomeKey wdStorynIndex = 1&apos;查找需要替换的字符串，使用空行替换While Selection.Find.Execute(FindText:=&quot;Wiki_img_tags&quot;, ReplaceWith:=&quot;^&amp;&quot;, MatchWildcards:=True, Forward:=True)&apos;在空行处增加新字符串及序号Selection.Text = &quot;images&quot; &amp; Format(nIndex, &quot;0&quot;)Selection.Collapse wdCollapseEndnIndex = nIndex + 1WendMsgBox &quot;完成！&quot;End Sub]]></content>
+      <tags>
+        <tag>Office</tag>
+        <tag>Word</tag>
+        <tag>VBA</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[使用sed在匹配行后插入一行]]></title>
+    <url>%2F2017%2F01%2F04%2Fsed-insert-line%2F</url>
+    <content type="text"><![CDATA[使用sed在匹配行后插入一行有各种各样的方法，根据处理文本的具体情况，可能会使用不同的命令。由于对sed不熟悉，在网上找了很久，都没有合适的方法，在CU论坛提了一个问题，很快就有热心网友回复，顺利解决问题。翻了很多文档，勉强理解了命令含义，记录下来备忘。sed的资料在网上查找来看，不太系统化，比较琐碎，后面可能需再学习积累。具体场景是批量处理多个文本文件，可以简化为以下文本：123456date: 2017-1-3update: 2017-1-3tags: [test]date: 2016-11-3tags: [test] 很多这样两行或三行的块，要把缺少update的块在date行后插入update且日期与date一致。网上能搜到的在匹配行后插入一行都是对一行匹配，这里仅对一行匹配是无法达到准确定位的目的的。CU网友提供的方法为，匹配date行后判断下一行是否匹配update，如匹配则不执行任何操作，不匹配则用update替换date，并输出，达到插入一行的目的。具体如下：1sed '/date/&#123;N;/update/!&#123;P;s/date/update/&#125;&#125;' testfile 比较重要的是N和P这两个函数参数，参考手册解释：N 表示添加下一行资料到pattern spaceP 表示打印出pattern space内的第一行资料! 表示不执行后面的函数，即对匹配地址不执行，未匹配地址则执行操作 参考文档请教匹配紧邻两行间插入一行且可以引用的方法？]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>ops</tag>
+        <tag>shell</tag>
+        <tag>sed</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Linux下批量替换目录下所有文件中的字符串]]></title>
+    <url>%2F2017%2F01%2F03%2Flinux-replace-string%2F</url>
+    <content type="text"><![CDATA[Linux下对目录中所有文件指定字符串批量替换可以使用sed和grep两个工具，配合精准高效的正则表达式来达到预期目的。 不包含子目录待处理目录下不包含子目录的情况比较简单，直接使用sed即能达到目的。1sed -i 's/oldstr/newstr/g' ./* 包含子目录如果待处理目录下包含子目录且需对子目录下的文件也进行替换时，需要借助grep工具先递归查找到所有包含需替换字符串的文件，再配合sed工具进行替换。1sed -i 's/oldstr/newstr/g' `grep -lr oldstr ./*` grep使用-l和-r参数，查找包含指定字符串的文件，查找范围为当前目录。-r参数表示递归查找，即查找当前目录及子目录，-l表示返回匹配的文件名，具体参数解释可以参考grep的手册。由此可得到所有需替换的文件，返回给sed进行替换处理。 参考文档grep 和sed配合批量替换实用脚本,目录下文件的批量替换]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>ops</tag>
+        <tag>shell</tag>
+        <tag>sed</tag>
+        <tag>grep</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Linux下查看DHCP客户端相关信息]]></title>
+    <url>%2F2016%2F12%2F27%2Flinux-dhclient-info%2F</url>
+    <content type="text"><![CDATA[很多时候可能需要在DHCP客户端核对一下DHCP相关信息，比如地址租期、续租时间、DHCP服务器地址等等。在Windows下比较方便，直接查看接口信息就可以了，在Linux下确不是特别的容易，不同的发行版可用的方法还不一样，网上搜罗了一些，记录备忘。查看dhclient-eth0.leases文件：1cat /var/lib/dhclient/dhclient-eth0.leases 不同的发行版文件位置可能不一样，不同主机网络接口也可能不一样，需要查找一下：1find / -name "dhclient*leases" 或者可以查看一下messages日志，也许能得到一些信息：1grep dhclient*lease /var/log/messages]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>ops</tag>
+        <tag>dhcp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[使用Python列出目录下文件的方法]]></title>
+    <url>%2F2016%2F12%2F26%2Fpython-list-dir%2F</url>
+    <content type="text"><![CDATA[初学Python，写一个小脚本需要列出目录下文件的。在网上搜了下，发现方法不少，这里做一个收集汇总。尽量补充对各个方法的使用情况。 使用os.listdir123import osfor filename in os.listdir('/root/dir'): print filename 最简单常用的方法，不能遍历目录下子目录，不能根据文件名进行过滤。可自行编写辅助函数遍历子目录，示例:123456789101112131415import os # Get the all files &amp; directories in the specified directory (path).def get_recursive_file_list(path): current_files = os.listdir(path) all_files = [] for file_name in current_files: full_file_name = os.path.join(path, file_name) all_files.append(full_file_name) if os.path.isdir(full_file_name): next_level_files = get_recursive_file_list(full_file_name) all_files.extend(next_level_files) return all_files 根据文件名过滤，可以参考这位博主的代码，不能转载这里就不贴了。避免重复造轮子，也可以参考下面几种方法。 使用glob模块123import globfor filaname in glob.glob('/root/dir/*.jpg'): print filename 可以使用通配符对文件名进行过滤。*表示匹配任意字符，?匹配单个字符，[]匹配指定范围内的字符。从Python3.5版本开始支持对子目录的递归遍历。具体使用方法可参考官方文档。 使用os.path.walk123456import os.pathdef listDir(args, dirname, filenames): print 'dir:',dirname for filename in filenames: print 'file:',filenameos.path.walk('/root/',listDir,None) 使用递归方式遍历目录，包括各级子目录。 使用os.walk12345import osfor dirpath,dirnames,filenames in os.walk('/root/'): print 'dir:',dirpath for filename in filenames: print 'file:',filename 非递归方式遍历目录及子目录。 后记缘起要在Linux环境下写个小脚本处理些文件，以上记录全部来自网络，本也花费了些许时间简单的使用测试，各个方法都有自己的优缺点，由于最后还是选择了用shell来处理，故并未进一步使用，后面如有用到再进一步补充完善。对于系统的文件和目录操作，仅是简单的脚本，最好还是本地shell类的语言，高级语言还是有点隔靴搔痒，杀鸡用牛刀。是记。 参考文档python列出文件夹下所有文件的四个方法Python语言获取目录下所有文件或目录的方法11.7. glob — Unix style pathname pattern expansion]]></content>
+      <tags>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Windows下简化markdown文档贴图流程]]></title>
+    <url>%2F2016%2F11%2F30%2F%E7%AE%80%E5%8C%96markdown%E6%96%87%E6%A1%A3%E8%B4%B4%E5%9B%BE%E6%B5%81%E7%A8%8B%2F</url>
+    <content type="text"><![CDATA[在markdown文档中插入图片需要使用下面的语法：1![图片描述](图片地址) 可以看到，比较麻烦的是图片地址，这里的地址可以是本地图片路径，也可以是图床链接。一般情况下我们使用的都是图床链接，主要是可以节省本地空间和使用cdn加速。在这种场景下，插入图片是一件比较麻烦的问题，先要把图片上传到你的图床，然后在图床中得到图片的外链，最后把链接写入markdown文档。对于书写文档这个场景来说，这个流程是相对繁琐了。幸运的是，网上有很多文章讨论了这个问题，并给出了很好的解决方法，参考已有的方法，记录本次操作过程。整体思路比较简单，绑定一个快捷键触发一个脚本，这个脚本会自动上传指定的图片到图床并得到相应的外链。改进后，在markdown文档中插入图片就和在word文档中插入图片一样，触发快捷键就可以得到一个markdown格式的图片描述。大部分方法使用的是python脚本，快捷键触发在Windows下一般使用的是autohotkey来实现，这两个环境在我本机上刚好都有用到，所以实现起来要方便许多，图床使用的是大部分博客用到的七牛，免费用户就能满足使用。 环境要求 python环境，pywin32组件，七牛SDK组件（python版） AutoHotKey 七牛云存储账户七牛云存储账户用于存放上传的图片，需要得到账户中的一些信息作为配置文件，在脚本自动上传图片时使用；AutoHotKey是一个快捷键绑定工具，用于绑定一个快捷键来触发上传脚本；python环境用于执行python脚本，pywin32组件用于python和Windows系统交互，把图床返回的外链输出到系统剪切板，七牛SDK用于对接七牛的API，实现图片上传和外链获取功能。 配置七牛账户信息新建一个配置文件config.ini，默认和python脚本在同一个目录，如有变动请调整python脚本中的路径信息。该文件配置了七牛账户的信息，上传脚本会读取该文件中的相关配置信息用于和七牛API通信，文件内容如下：12345[qiniu]ak = # 填入你的AKsk = # 填入你的SKurl = # 填入你的域名地址bucket = # 填入你的七牛空间名称 配置文件中的ak和sk为密钥，登录七牛后在个人面板-密钥管理栏目下可以看到，填入配置文件，不需要#，不需要冒号。url为七牛给你分配的域名地址，登录七牛后点击对象存储，可以得到测试域名或融合cdn域名。bucket为你自行创建的对象存储空间名称。 创建自动上传脚本安装python环境，可在官网下载安装，主流版本即可。安装pywin32模块，一般官方python安装包自带该模块，无需再次安装。安装七牛SDK，可以是用pip简单安装，或参考官方文档其它安装方式。1pip install qiniu 自动上传脚本为python编写，来自其它文章，做了简单的修改和注释，如下：12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758# -*- coding: utf-8 -*-import osimport sysimport win32clipboard as wreload(sys)sys.setdefaultencoding('utf-8')from qiniu import Auth, put_fileimport ConfigParserfrom datetime import datetime# 读取配置文件，得到相关键值cf = ConfigParser.ConfigParser()cf.read('D:\HiScripts\qiniu-pic-upload\config.ini') # 七牛账户信息配置文件，如有变更需调整路径access_key = cf.get('qiniu', 'ak') # AKsecret_key = cf.get('qiniu', 'sk') # SKbucket_name = cf.get('qiniu', 'bucket') # 七牛空间名url = cf.get('qiniu', 'url') # urlq = Auth(access_key, secret_key)mime_type = "image/jpeg"params = &#123;'x:a': 'a'&#125;prefix = datetime.now().strftime('%H%M%S%Y%m%d')def upload_qiniu(path, prefix): ''' upload file to qiniu ''' dirname, filename = os.path.split(path) key = '%s_%s' % (prefix, filename) # upload to qiniu's dir key = key.decode('gbk').encode('utf8') token = q.upload_token(bucket_name, key) progress_handler = lambda progress, total: progress ret, info = put_file(token, key, path, params, mime_type, progress_handler=progress_handler) return ret != None and ret['key'] == keydef setText(aString): w.OpenClipboard() w.EmptyClipboard() w.SetClipboardText(aString) w.CloseClipboard()if __name__ == '__main__': path = sys.argv[1] ret = upload_qiniu(path, prefix) if ret: # upload success name = os.path.split(path)[1] alt = name.split('.', 1) markdown_url = "![%s](%s/%s_%s \"%s\")" % (alt[0], url, prefix, name, alt[0]) # make it to clipboard setText(markdown_url) else: print "upload_failed" 了解一点python最好，可以自行手动进行调试，脚本在不同系统下可能会有些小差异。可以先手动执行上传脚本，测试是否可用。1python qiniu-pic-upload.py test.jpg 手动验证脚本正常后进行下一步，把脚本和热键绑定，方便使用。 创建热键脚本借助于AutoHotKey软件来实现按下指定快捷键后调用执行我们上面的上传脚本。AHK非常强大，类似一种脚本语言，编写好脚本可以实现各样功能。先从官网下载安装，使用方法可参考官方文档或AHK中文项目，我们用的热键脚本比较简单：1^!p::Run %comspec% /c "Python D:\HiScripts\qiniu-pic-upload\qiniu-pic-upload.py "%Clipboard%"" /p 安装好AHK软件后，新建一个filename.ahk文件，输入以上内容，保存，双击运行即可实现上传脚本和快捷键的绑定。要使用快捷键需保证脚本一直在后头运行。脚本内容比较简单，^表示Ctrl键，!表示Alt键，::之前是快捷键组合，这里就是Ctrl+Alt+p，之后是要执行的命令，%comspec%是引用一个环境变量，在Windows下一般是cmd.exe，/c这个参数是说命令执行后立刻关闭命令行窗口，在正式使用是我们需要这个参数，但在调试的时候，命令行窗户一闪而过，无法有效的看到异常信息，所以在调试时可以把这个参数改为/k，保持窗口。后面就是和手动执行一样的命令，从这个命令可以看出，我们是用上传脚本上传系统剪切板里的图片，这里的情况有些复杂，后面会再详细讨论一下。这个脚本的应用场景是，鼠标左键选中一个图片文件，Ctrl+c复制，Ctrl+Alt+p上传图片到七牛并返回图片的markdown语法格式到系统剪切板，Ctrl+v粘贴到markdown文档。 异常排查本来这篇文章也是参考其他资料写的，脚本代码基本也没改动，但在把其他代码直接拿来用是因系统环境问题还是有一些小问题，把处理过程简略写一下。 在cmd里执行脚本的环境变量问题。开始是用的git bash来调试python脚本，基本上按资料中的代码可以直接使用，后来在cmd是执行的时候却一直报错。根据报错信息，查看七牛SDK的源码文件，应该是有一个os.getenv方法报错，没有得到正确的HOME变量，查看系统环境变量的确没这个变量，可能是系统是Win10预览版的锅，手动在环境变量里添加HOME，注销生效后脚本正常。 ahk脚本调试问题。虽然一直有用ahk脚本，但也只是网上看别人脚本拿过来直接用的水平，一直没学习研究过。使用ahk脚本调用python时，一直报错，但是由于参数问题，cmd窗口一直一闪而过，找了好久才找到一个/k的参数，可以保持命令行窗口，看清了错误信息。 python脚本工作目录问题。手动执行python脚本一切正常，但是在ahk脚本调用时就出错，通过上面看清错误信息，发现应该是读取七牛账户配置信息config.ini文件出错，考虑了一下应该是python脚本中没有使用绝对路径的问题，ahk调用python脚本的当前工作目录并不是config.ini文件目录，而python脚本中使用了一个相对路径，修改为绝对路径后错误消除，ahk可以正常调用python脚本。 ahk脚本中包含空格的参数处理。ahk脚本中调用python脚本后给了一个剪切板环境变量作为python脚本的外部参数传入，而剪切板里一般就是要上传图片的文件路径，路径中包含空格时会造成脚本异常，使用引号&quot;%Clipboard%&quot;避免这个问题。 后记折腾了半天，这个基本已经可用了。但我个人的应用场景和这个脚本的工作流不太匹配，脚本中是选择一个图片文件上传到图床，实际使用的较多的是截图后贴入markdown文档，就是截图后上传到图床。目前找了一个了ShareX的截图软件来实现这个需求，这个软件会让你自定义截图后的一些操作，比如保存到指定目录并把文件路径复制到剪切板，刚好可以和上面的脚本对接起来。暂且使用，后面可以根据需要再调整。 参考文档MarkDown简化贴图流程]]></content>
+      <tags>
+        <tag>blog</tag>
+        <tag>hexo</tag>
+        <tag>markdown</tag>
+        <tag>ahk</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[使用daocloud持续集成部署hexo博客]]></title>
+    <url>%2F2016%2F11%2F22%2F%E4%BD%BF%E7%94%A8daocloud%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90%E9%83%A8%E7%BD%B2hexo%E5%8D%9A%E5%AE%A2%2F</url>
+    <content type="text"><![CDATA[曾经也为随时随地书写和部署hexo博客这种伪需求折腾过，因为非专业人士，最后想到的办法也就是把hexo目录全部传到github上，在其它地方安装hexo环境，拉下github仓库就可以部署了。这种方法，除了验证了一次的确可行外，事实上一次也没使用过（毕竟伪需求）。偶然看到有使用ci部署hexo博客的文章，细看工作流和上面的粗暴模式应该是一样的，只是把原来手动拉仓库部署变成了通知ci系统拉仓库部署，省了自己手动安装环境部署的重复工作，方便了许多。借助网上一些免费的服务，试着折腾了一下，粗浅的理解了ci的意思，记录备忘。 前述这里不细说hexo的部署流程，只说写博客的工作流。在自己电脑上要发布一篇博客的流程是：1写一篇md文档----本机hexo处理生成静态文件----部署到远端 在本机有hexo环境的情况下，上面的工作流是一个很简单的过程，只需要hexo g和hexo d就可以了。下面是使用ci来部署hexo博客的工作流：1写一篇md文档--git提交到远程仓库--触发ci生成静态文件--部署到远端 可以看到，在这个工作流下发布一篇博客更简单了，只需写完文档后git提交并push到远程仓库即可，剩下的生成静态文件及部署到远端的工作均由ci完成。接下来讨论如何配置这样的一个工作流。 创建ci源仓库ci源仓库，就是一个和ci系统做关联git仓库。ci系统会给该仓库配置一个webhook，当该仓库有符合触发条件的变动时，会触发webhook通知ci系统拉取该仓库内容，执行指定的操作。粗浅的理解，这就是ci的工作流，推代码到远端、触发、ci拉取、执行、done。由于安全的问题（这个仓库里会存放ssh私钥），这里的仓库须配置为私有仓库，国内推荐使用coding的私有仓库，免费且可以同步到daocloud（本文用的ci）。仓库里要存放的东西就是本地博客根目录里的东西，可以在根目录执行hexo clean清理后，git init初始化仓库推送到远程。在实践中，对于要推送到远程仓库的东西还可以做些取舍和改动。首先，scaffolds、source、themes三个目录和package.json、config.yml两个文件是必须的，这涉及到原始markdown文档，主题，站点配置，hexo模块信息等，ci系统必须根据这些个人化的数据才能部署你的博客。还有一个目录node_modules存放着已安装的node模块，这个目录是不用放进仓库的，可以在每次ci的过程中通过npm install来安装，当然，这也会增加ci过程的时间。其他文件都是不需要放进仓库的，可以使用.gitignore文件进行控制。到这里ci源仓库已经建立了，为了配合ci系统后面我们还会为这个仓库创建一个构建分支用于daocloud构建镜像，我们可以称当前分支为ci分支用于触发ci流程。我这里使用了同一个仓库的两个分支来区分构建和持续集成，在实践上可以根据具体情况来调整，在后面配置daocloud时再详细讨论。 创建daocloud代码构建项目ci系统有多种，提供公共服务的有国外的travis ci，国内的flow.ci，但能把各个免费的公共服务组合起来达到我们目的的可能不多。daocloud在代码构建这个服务中提供了ci功能，能够达到持续集成部署hexo博客的目的。使用daocloud代码构建功能需要一点docker知识，目前，daocloud代码构建项目的工作流应该是创建一个代码构建项目和远程仓库关联，关联后会同步远程仓库的代码，根据仓库中指定文件（一般是Dockerfile）构建一个镜像，镜像构建成功后，如果该代码构建项目选择了持续集成功能，daocloud会使用该镜像（或者指定的其他镜像）创建一个容器，容器会自动同步远程仓库，执行指定的指令进行代码编译、部署等工作。本质就是搞一个容器，容器会根据你预先写好的指令完成以前要手动执行的工作，实现了所谓的自动化编译部署。由此，我们需要一些控制工作流的脚本文件，这里共需要三个。第一个是Dockerfile，用于构建docker镜像，和在本机上构建镜像是一样的，文件语法是标准的Dockerfile格式，示例如下：1234FROM daocloud.io/library/nodeMAINTAINER xxx &lt;xxx@xx.com&gt;RUN echo &quot;Asia/Shanghai&quot; &gt; /etc/timezone &amp;&amp; dpkg-reconfigure -f noninteractive tzdataRUN npm --registry=https://registry.npm.taobao.org install hexo-cli -g 构建镜像里的操作比较简单，使用node作为基础镜像，更改时区、从淘宝源安装hexo-cli两步操作就可以了。上面提到，远程仓库里有两个分支，分别用于构建和持续集成，原因是在目前的应用场景下，构建并不是一个频繁的操作，事实测试好了只需构建一次就可以一直使用这个镜像了，所以我们不想每次推送到远程仓库都会触发构建过程，这会浪费一些时间。所以，这里特别弄了一个分支，构建过程以这个分支作为触发条件即可。这个分支里只有两个文件，Dockerfile和daocloud.yml。daocloud.yml文件是daocloud平台提供的一个用于控制代码构建流程的文件，语法格式为yaml，编写方法可以参考官方文档，也可以不使用这个文件直接在web页面通过web ui界面进行流程控制及编排，可以降低上手难度。这里使用了两个daocloud.yml文件，一个在构建分支，一个在ci分支。构建分支的文件用于指明构建镜像要使用的Dockerfile文件的路径，ci分支的文件用于指明容器运行起来后，要在容器中操作的相关命令。构建分支的daocloud.yml文件内容如下：123456version: &quot;2.0&quot;build: image: dockerfile_path: /Dockerfile build_dir: / cache: true cache为true表示构建会使用缓存，如果和上次构建过程没有变化，本次构建会直接使用上次的镜像，但这个过程还是会浪费一些时间，所以如果没有重新构建的需求最好还是避免不必要的出发构建流程。在主分支，就是博客根目录分支的daocloud.yml文件内容如下：1234567891011121314version: &quot;2.0&quot;test: image: daocloud.io/ivused/hexo-blog-ci:latest install: - npm --registry=https://registry.npm.taobao.org install - git config --global user.name &quot;daocloud-ci&quot; - git config --global user.email &quot;ivused@qq.com&quot; - cp -r .ssh ~/;chmod -R 600 ~/.ssh - echo -e &quot;Host git.coding.net\n HostName git.coding.net\n StrictHostKeyChecking no\n\nHost github.com\n HostName github.com\n StrictHostKeyChecking no&quot; &gt;&gt; /etc/ssh/ssh_config script: - hexo clean - hexo g - hexo d - rm -rf ~/.ssh image指定了运行容器的镜像，在构建镜像成功后可以查看到镜像的地址。install就是在容器中执行的命令了，还不太明白install和script的区别，这里是当成同样的在容器中执行命令的作用来使了。在容器中，默认的当前工作目录为远程仓库触发分支的根目录，所以可以直接执行npm install来安装hexo模块，然后配置了一下git的基础信息、ssh密钥和ssh_config文件信息，目的是为后面向博客pages仓库推送。ssh密钥是在自己电脑上生成的放到主分支下的，这里可能存在安全风险，但可以接受，这个公钥需配置为pages仓库的部署公钥，也仅用于推送到pages仓库，所以就算密钥泄露也不会有太大的损失。还有修改了容器中默认ssh_config文件的配置，使git.coding.net和github.com这两个主机不进行主机密钥验证。ssh认证机制决定了如果连接到一个新主机需要确认一下主机身份，在这个交互式的操作里如果不响应则默认拒绝连接主机，会造成无法推送到pages仓库，当然也可以对所有主机直接关闭或使用选项指定关闭。接下来就是和本机操作一样的三板斧，清理、生成、部署。在实际部署中完全可以不使用daocloud.yml文件来控制流程，daocloud的web ui浅显易懂，直接在web界面操作更直观些。在调试完成后可以直接转换为daocloud.yml文件放到仓库里使用。到这里，准备工作就完成了，我们有一个ci源仓库，有两个分支，主分支为博客根目录，增加的.ssh目录用于存放准备好的ssh密钥，增加了daocloud.yml文件用于控制测试流程，另有一个构建分支，存放了两个文件，一个Dockerfile文件用于构建镜像，一个daocloud.yml文件用于控制构建工作流。接下来在daoclou平台创建一个构建项目，根据情况配置名字、代码仓库、机房即可。项目创建完成后进入项目调整一些设置、触发规则、流程定义等，就可以手动开始构建及测试，一切正常后就可以push到远程仓库，验证自动触发部署。 后记目前使用这种方式部署博客整个工作流还是比较满意，对当前本机的部署环境没有任何影响，对部署方式不管是pages服务还是自有主机都不影响，相当于多了一个备份的部署方法，本机有环境就可以本机部署，本机无环境可以直接推到远程仓库使用ci部署。还存在的一些小问题主要是网络问题，由于众所周知的原因，选择国内机房部署到github pages时网络比较慢，甚至会失去连接，可以根据自己pages服务情况选择机房以改善效果。还有每次ci过程都会安装node模块，可以考虑使用国内源加速，或者甚至直接把模块目录推到远程仓库直接使用，这些可能和软件工程的最佳实践不符，不过自己的博客倒也可以折腾玩玩。考虑一下首尾呼应，看看开始说的随时随地写博客的伪需求，在没有自己环境的情况下还是要安装git，拉下来写完推上去，对比暴力模式似乎就是少了一点安装node和hexo的工作，并且都没有解决陌生环境下的密钥安全问题，反思来看，这种应用场景几乎不会存在，折腾可以到此打住。不过，在coding的web页面也可以新建md文档，提交到仓库，倒是某种程度上解决了这种伪需求，算是意外收获。 参考文档随时随地让Hexo持续部署利用Daocloud持续部署HexoDockerfile指令汇总及解析daocloud.yml 2.0用 Travis CI 自动部署 hexo手把手教你使用Travis CI自动部署你的Hexo博客到Github上使用Travis CI自动部署Github/Coding Pages博客]]></content>
+      <tags>
+        <tag>blog</tag>
+        <tag>hexo</tag>
+        <tag>daocloud</tag>
+        <tag>ci</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[使git忽略已加入版本控制的文件]]></title>
+    <url>%2F2016%2F11%2F21%2F%E4%BD%BFgit%E5%BF%BD%E7%95%A5%E5%B7%B2%E5%8A%A0%E5%85%A5%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E7%9A%84%E6%96%87%E4%BB%B6%2F</url>
+    <content type="text"><![CDATA[使用.gitignore文件可以忽略指定的文件，使其不纳入版本管理系统，但.gitingore文件只对从未纳入版本管理的文件有效，即从未add或commit的文件，所以我们一般会在初始化一个git仓库时使用这个文件。在实际使用中，有时会有一些文件之前在版本管理系统中但后面不想继续让版本管理系统追踪这些文件，这就需要其它方法配合.gitignore文件来使用了。如果不想继续追踪的文件是不再需要了，可以直接物理删除，提交即可。这个没什么好说的，这里说的场景是不想继续追踪的文件，需要在本地继续保持，不想继续纳入版本管理。可以使用下面的方法：1git rm --cached filename 然后，把文件名加入.gitignore文件，提交本次更改即可。可以看到，git rm --cached删除的是追踪状态，而不是物理文件，一个被追踪的文件删除追踪状态后就是一个未被追踪的文件，就可以使用.gitignore来进行管理了。 参考文档git忽略已经被提交的文件]]></content>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu下快速搭建mediawiki环境]]></title>
+    <url>%2F2016%2F11%2F14%2FUbuntu-mediawiki%2F</url>
+    <content type="text"><![CDATA[mediawiki需要lamp的支持，手动安装可能会比较繁琐，这里使用xampp+bitnami通用安装工具进行快速安装。搭建一个基本可用的mediawiki环境只需两个离线安装包即可，可以在xampp官网下载。xampp安装包：https://www.apachefriends.org/zh_cn/index.htmlbitnami提供的mediawiki一键安装包：https://bitnami.com/stack/xampp#mediawiki首先，安装xampp，给予离线安装包可执行权限，直接执行，一路yes即可。默认安装在/opt/lampp/目录下。123456789101112131415161718192021222324252627282930313233343536root@248f3d10bf8a:~# ./xampp-linux-x64-5.6.24-1-installer.run----------------------------------------------------------------------------Welcome to the XAMPP Setup Wizard.----------------------------------------------------------------------------Select the components you want to install; clear the components you do not wantto install. Click Next when you are ready to continue.XAMPP Core Files : Y (Cannot be edited)XAMPP Developer Files [Y/n] :yIs the selection above correct? [Y/n]: y----------------------------------------------------------------------------Installation DirectoryXAMPP will be installed to /opt/lamppPress [Enter] to continue:----------------------------------------------------------------------------Setup is now ready to begin installing XAMPP on your computer.Do you want to continue? [Y/n]: y----------------------------------------------------------------------------Please wait while Setup installs XAMPP on your computer. Installing 0% ______________ 50% ______________ 100% #########################################----------------------------------------------------------------------------Setup has finished installing XAMPP on your computer.root@248f3d10bf8a:~# 安装完xampp后需要启动xampp的相关组件再继续下面的安装，主要是启动MySQL服务，xampp中默认MySQL的root密码为空，这个在后面安装mediawiki时会用到，如果手动更改root密码，后面安装时需输入更改的密码。1234567root@248f3d10bf8a:~# cd /opt/lampp/root@248f3d10bf8a:/opt/lampp# ./lampp startStarting XAMPP for Linux 5.6.24-1...XAMPP: Starting Apache...ok.XAMPP: Starting MySQL...ok.XAMPP: Starting ProFTPD...ok.root@248f3d10bf8a:/opt/lampp# 有时可能会报错，MySQL启动需要netstat这个包，Ubuntu16.04下可能没有netstat这个命令，需手动安装一下net-tools这个包：1apt-get install net-tools 服务都启动后，在浏览器打开localhost应该能看到xampp的默认页面，说明xampp安装成功。下面直接安装mediawiki，给予安装包可执行权限，直接执行，根据安装脚本提示输入相关信息进行初始化配置。安装脚本在提示时有几个地方不太明确，根据经验猜测目前是安装成功了。12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364root@248f3d10bf8a:~# ./bitnami-mediawiki-1.27.1-1-module-linux-x64-installer.runLanguage SelectionPlease select the installation language[1] English - English[2] Spanish - Espa�ol[3] Simplified Chinese - ????Please choose an option [1] : 1----------------------------------------------------------------------------Welcome to the Bitnami MediaWiki Module Setup Wizard.----------------------------------------------------------------------------Installation folderPlease choose a folder that contains an installation of Bitnami or XAMPP.Select a folder [/opt/lampp]:Note: This module requires a pre-existing installation of Bitnami or aBitnami-compatible stack like XAMPP. Please select the previous platforminstallation. For example: /opt/bitnami or /opt/lamppEnter password:----------------------------------------------------------------------------Create Admin accountLogin [user]: hiYour real name [User Name]: hiEmail Address [user@example.com]:Enter the application password :Retype password :Enter password:----------------------------------------------------------------------------MediaWikiPlease configure MediaWiki installationWiki name [hi&apos;s Wiki!]:----------------------------------------------------------------------------Setup is now ready to begin installing Bitnami MediaWiki Module on yourcomputer.Do you want to continue? [Y/n]: y----------------------------------------------------------------------------Please wait while Setup installs Bitnami MediaWiki Module on your computer. Installing 0% ______________ 50% ______________ 100% ########################################Enter password:#----------------------------------------------------------------------------Setup has finished installing Bitnami MediaWiki Module on your computer.Launch Bitnami MediaWiki Module [Y/n]: yroot@248f3d10bf8a:~# 执行安装程序后，首先提示的是选择安装语言，这里根据需要选择，如果系统目前尚不支持中文请不要选择中文，以免后面提示乱码。然后是提示选择xampp的安装路径，如果前面安装xampp时没有更改默认路径，这里直接回车确认即可。在确认xampp路径后，提示输入密码，这里的提示非常不清楚，不明白输入什么密码，系统用户的还是MySQL的，猜测为数据库的密码，之前安装时MySQL默认root密码为空，这里直接回车即可。接下来是mediawiki的初始管理账号创建，用户名，密码。密码应该是需要8位，如果一直不成功可以考虑这里是否有问题。然后就是wiki名称，自行配置，接下来yes就开始安装。安装到100%后会等待一会，又出现一个提示不清楚的输入密码，这里仍猜测为数据库密码，直接回车，安装完成，yes启动运行。接下来打开浏览器访问localhost，在xampp首页上面点击applications，可以看到Bitnami MediaWiki Module已安装成功，点击access就可以访问mediawiki页面了。]]></content>
+      <tags>
+        <tag>mediawiki</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[python中日期和时间的相关操作]]></title>
+    <url>%2F2016%2F11%2F01%2Fpython-datetime%2F</url>
+    <content type="text"><![CDATA[python中关于日期和时间的相关操作一般使用datetime这个模块，这个模块在标准库中，详细使用API文档可以参考官方文档。这里记录一下目前用到的快速上手语法。 获取日期 123456789import datetime# 获取今天日期today = datetime.date.today()# 获取昨天日期yesterday = today - datetime.timedelta(days=1)# 获取前天日期b_yesterday = today - datetime.timedelta(days=2)# 获取明天日期tomorrow = today - datetime.timedelta(days=-1) 日期和字符串转换日期转换为字符串涉及到以什么格式转换，由此产生了格式控制符，详细的格式控制符可参考官方文档。 12# 把一个日期对象转换为字符串today_str = today.strftime("%Y%m%d") 常用的格式控制符： 123%Y 四位数年份%m 两位数月份%d 两位数的每月第几天 星期（周）相关操作在datetime模块中，有两个和星期有关的函数，datetime.weekday()返回一个表示周几的整数，星期一是0，星期日是6；datetime.isoweekday()返回一个表示周几的整数，星期一是1，星期日是7。 1234import datetime# 获取今天是一周第几天today_weekday = datetime.date.today().weekday()today_weekday = datetime.date.today().isoweekday() 参考文档Documentation » The Python Standard Library » 8. Data Types » ```]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>date</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu下unzip解压中文文件名乱码问题]]></title>
+    <url>%2F2016%2F10%2F21%2FUbuntu%E4%B8%8Bunzip%E8%A7%A3%E5%8E%8B%E4%B8%AD%E6%96%87%E6%96%87%E4%BB%B6%E5%90%8D%E4%B9%B1%E7%A0%81%E9%97%AE%E9%A2%98%2F</url>
+    <content type="text"><![CDATA[ubuntu下默认的中文支持编码应该是utf8，解压Windows下的压缩包时，如果有中文文件名会出现乱码，原因是Windows下默认编码是GBK、CP936之类的。解决方法是可以在unzip解压时加上- O参数，该参数在man手册里为提供说明，在unzip --help下有简单的解释说明。未做深入研究，以下命令可以指定对应编码解压：1unzip -O utf8 test.zip 参考文档Ubuntu下解决解压zip文件中文文件名乱码问题]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>ubuntu</tag>
+        <tag>troubleshooting</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Sublime远程编辑文件]]></title>
+    <url>%2F2016%2F10%2F21%2FSublime%E8%BF%9C%E7%A8%8B%E7%BC%96%E8%BE%91%E6%96%87%E4%BB%B6%2F</url>
+    <content type="text"><![CDATA[远程在Linux环境下进行文件编辑的时候，一般使用的时vi/vim，有时对vi/vim不够熟悉或出于其它原因想使用本地的sublime编辑器，从网上搜索资料，发现sublime可以配合ftp/sftp这样的插件实现远程编辑的功能。基本原理应该是配合sftp功能，从远程目录拉取待编辑文件到本地，在sublime中编辑保存后同时上传到远程主机，覆盖原文件。 安装配置sftp插件使用shift+ctrl+p快捷键打开Package Control，搜索sftp，安装插件后，在File-SFTP/FTP-Setup Server下配置远端服务器相关信息，需要配置的字段主要是主机、用户名、密码、端口、远端目录。配置后，保存即可。 简单使用选择File-SFTP/FTP-Browse Server，选择要编辑的文件，编辑后保存，自动上传到远端。 待补充以上在sublime2和sublime3中测试均可使用，还有文件/文件夹同步功能，后面用到后详细补充。]]></content>
+      <tags>
+        <tag>sublime</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Docker For Windows安装使用]]></title>
+    <url>%2F2016%2F10%2F16%2Fdocker-for-windows%2F</url>
+    <content type="text"><![CDATA[使用的是Windows10的开发者预览版，最近一次更新后Vbox就启动不了了，一直在Vbox的虚拟机里搭建环境学习Flask,这下环境也没了。考虑搞一个相对稳定的学习环境（其实就是为了瞎折腾），貌似Windows下的Docker基本可用了，捣腾一下。安装按照官方文档就差不多，有一些需要注意的地方简单写一写，主要是Docker的使用，一边学习一边记录。 安装安装之前参考官方文档，目前Docker for Windows仅支持Windows 10的专业版、企业版、教育版，版本号在10586以上的64位系统。查看系统小版本号可以打开cmd，在打开的命令行窗口的banner上可以找到。另外，系统需要Hyper-V的支持，使能Hyper-V后Vbox将不可用，这个需注意。所以，就目前我的理解，Docker for Windows还是和之前的Docker Toolbox一样，在Windows系统上创建一个Linux虚拟机，在这个虚拟机里面跑docker，只不过之前是Docker Toolbox是调用Vbox来创建Linux虚拟机，现在的Docker for Windows是调用Hyper-V来创建Linux虚拟机。当然，实际上可能并不是这么简单的，毕竟各种新闻稿都说了很多优点，各种细节随着以后慢慢学习再深入研究了。目前来看，虽然免不了隔靴搔痒的感觉，但只要能在ps或cmd里提供原生一样的命令供学习就够了。 基础安装配置确认系统符合要求后，从官网下载最新版本的安装文件开始安装，安装器很简单，下一步安装即可。Docker for Windows需要Hyper-V支持，如果系统当前没有启用Hyper-V，Docker for Windows会自动启用Hyper-V，期间系统会重启。安装完成后，会自动启动Docker，托盘区会有一个logo，可以点击Setting进入面板，左下角显示Docker is starting。正常情况下，2分钟内会显示为Docker is running，表示Docker正常启动了，可以在命令行试几个命令看看，参考官方文档即可。不正常情况就会报错，错误可能有多种，我说一个我踩过的坑。一直启动失败，显示获取不到IP之类，最后查到应是C盘空间满了，Hyper-V中的Linux虚拟机没有创建的空间，所以docker一直无法running，解决方法是在Hyper-V中转移docker的那个虚拟机到空间充足的分区。总结就是，C盘空间紧张或对C盘空间有洁癖的建议在Hyper-V中设置默认虚拟机的位置，手动转移docker虚拟机到指定分区，因为拉取的镜像也是存在虚拟机的虚拟磁盘里的，拉取镜像过多，这个虚拟磁盘文件就会越来越大。还有一个问题在使用前需注意，由于总所周知的原因，从DockerHub拉镜像的时候速度基本没有，有两个方法可以参考，用代理和使用加速器。如果有合适的代理，直接从DockerHub拉的话，速度应该也还好，Docker的Setting面板里有Porxies选项可以配置代理服务器相关参数。使用加速器的话，目前国内有daocloud提供免费的加速器服务，在DaoCloud官网注册后可以获取到一个专属的加速器地址，在Setting面板Docker Deamon选项中配置到registry-mirrors即可，如下：1234567&#123; "registry-mirrors": [ "http://xxxxxx.m.daocloud.io" ], "insecure-registries": [], "debug": false&#125; 两种方法不要同时使用，一般我们的代理都是国外的代理，代理到国外再绕道国内加速器，这个情况不合逻辑。 在PowerShell中启用Tab补全在Linux中docker安装成功后，docker 相关的命令都可以自动补全，但在Windows中默认没有这个功能。如果使用PowerShell作为命令行工具，可以安装posh-docker模块来实现这个功能。 以管理员身份打开PowerShell； 调整一下脚本执行策略，允许执行信任的发布者签名的脚本。在打开的PowerShell中输入： 1Set-ExecutionPolicy RemoteSigned 安装并导入posh-docker模块，为了在每次打开PowerShell会话中使用补全功能，需创建一个配置变量用于自动导入posh-docker模块。 123Install-Module -Scope CurrentUser posh-docker -ForceImport-Module posh-dockerAdd-Content $PROFILE "`nImport-Module posh-docker" 完成！可以试一下，对docker命令、参数、镜像和容器名称都可以Tab补全。 参考文档Getting Started with Docker for WindowsDaoCloud加速器Docker for Windows docker pull 镜像到哪里去了windows 10中docker的安装]]></content>
+      <tags>
+        <tag>Docker</tag>
+        <tag>devops</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Flask学习笔记]]></title>
+    <url>%2F2016%2F09%2F26%2Fthe-flask-notes%2F</url>
+    <content type="text"><![CDATA[简述环境安装Flask支持Python2和Python3，一般建议使用virtualenv安装调试，避免破坏主机环境。新建一个文件夹，在里面创建虚拟环境后安装flask。1234567891011sudo apt-get install python-virtualenvmkdir flask-testcd flask-test# 创建名为venv的python虚拟环境virtualenv venv# 激活虚拟环境source ./venv/bin/activate# 去激活虚拟环境deactivate# 在虚拟环境下安装使用pip安装flaskpip install flask 程序结构初始化所有Flask程序都必须创建一个程序实例，Web服务器通过WSGI把来自客户端的所有请求转交给这个对象实例处理，然后把处理结果返回给客户端。程序实例是Flask类的对象，简单的，可以使用以下方法创建：12from flask import Flaskapp = Flask(__name__) Flask类只有一个必须指定的参数，即程序主模块或包的名字，一般地，Python中的__name_就是所需要的值。程序实例使用run方法启动Flask集成的开发Web服务器。该Web服务器仅用于简单的开发调测，不适合生产环境使用，生产环境一般会搭配其它Web服务器使用。12if __name_ = '__main__': app.run(debug=True) 路由和视图函数Web服务器把客户端请求的URL发给Flask程序实例处理，程序实例需要知道每个URL对应执行哪些代码，所以保存了一个URL到Python函数的映射关系，处理这种映射关系的程序称之为路由。在Flask程序中定义路由的最简单方式是使用程序实例提供的app.route修饰器，把修饰的函数注册为路由。123@app.route('/') ##路由def index(): ##视图函数 return '&lt;h1&gt;Hello,World!&lt;/h1&gt;' 上例中把根/URL映射到index()这个视图函数，客户端访问根URL（即直接访问网址）时，Flask就会使用index()这个视图函数来处理响应。这么一对URL和视图函数的映射称为路由，可以使用app.route修饰器来简单的创建路由。还有一种动态路由如下：123@app.route('/user/&lt;name&gt;')def user(name): return '&lt;h1&gt;Hello,%s!&lt;/h1&gt;' % name 路由中尖括号部分为动态的，任何匹配静态部分的URL都会转到该路由处理，动态部分作为参数传入视图函数。路由中动态部分默认使用字符串，不过也可以使用类型定义。如：/usr/&lt;int:id&gt;。 一个完整的程序123456789from flask import Flaskapp = Flask(__name__)@app.route('/') ##路由def index(): ##视图函数 return '&lt;h1&gt;Hello,World!&lt;/h1&gt;'if __name_ = '__main__': app.run(debug=True) 在已安装Flask的环境中启动这个程序：1python hello.py 默认情况，Web服务器会在本机5000端口监听，只能在本机访问（localhost或127.0.0.1）。 Flask扩展Flask被设计为可扩展形式，框架本身仅提供基础功能，大部分生产中要用到的重要功能均以扩展形式提供。大部分扩展是单独的python包，可通过pip安装。以Flask-Script简单说明在Flask程序中使用扩展。安装：1pip install flask-script 在源文件中导入相关包，把Flask的程序实例app作为参数传入主类的构造函数来创建主类的实例，创建的对象就可以在各个地方使用。12345from flask_script import Managermanager = Manager(app)# ...if __name_ = '__main__': manager.run() flask_script为Flask程序提供了一个命令行解析器，可以让程序在启动时接受一些命令行参数来控制启动行为。1python hello.py runserver --host 0.0.0.0 这样可以让Web服务器在所有网络接口上监听，其它计算机就可以访问这个Web服务器而不仅仅是只能在本机访问。还有一些其它命令可以参考使用。 模板视图函数负责返回一个响应，对复杂的响应直接写在视图函数中会不好维护，这里使用模板功能。模板可以理解为预先写好的HTML文件，视图函数负责调用该模板文件并传入相关变量即可生成复杂的HTML响应。由此即可分离业务逻辑和表现逻辑，视图函数主要负责业务逻辑，包括相关变量处理，功能函数定义等；模板页面代码负责表现逻辑，代入视图函数传入的变量至模板占位符，也有各种变量处理和逻辑控制用于表现的处理。Flask框架集成了Jinja2模板引擎，直接导入即可使用。渲染模板：12345from flask import Flask,render_template#...@app.route('/')def index(): return render_template('index.html') 默认情况下Flask在程序文件夹的templates文件夹中查找对应的模板文件。模板文件本身可以认为是静态的，包含动态的代码处理过程，使用模板文件的过程一般称为渲染模板，如上的render_template函数。该函数会接受多个参数，第一个参数为模板文件名称，后面可以跟多个键值对，表示传入模板的变量。 模板中的变量模板中使用结构表示一个变量，这是一种特殊的占位符，告诉模板引擎这个位置的值从渲染时的数据中获取。Jinja2能识别所有类型的变量，包括列表、字典和对象。1234&lt;p&gt;A value from a dictionary: &#123;&#123; mydict['key'] &#125;&#125;.&lt;/p&gt;&lt;p&gt;A value from a list: &#123;&#123; mylist[3] &#125;&#125;.&lt;/p&gt;&lt;p&gt;A value from a list, with a variable index: &#123;&#123; mylist[myintvar] &#125;&#125;.&lt;/p&gt;&lt;p&gt;A value from an object's method: &#123;&#123; myobj.somemethod() &#125;&#125;.&lt;/p&gt; 还有一个过滤器的概念，可以使用过滤器修改变量的表现方法，过滤器名在变量名后，中间使用竖线|分割，类似Linux中的管道。如下，以首字母大写的形式显示变量name的值：1Hello,&#123;&#123;name|capitalize&#125;&#125; capitalize即是一个过滤器名称，Jinja2提供的部分常用过滤器如下： 过滤器名 说 明 safe 渲染值时不转义 capitalize 把值的首字母转换成大写，其他字母转换成小写 lower 把值转换成小写形式 upper 把值转换成大写形式 title 把值中每个单词的首字母都转换成大写 trim 把值的首尾空格去掉 striptags 渲染之前把值中所有的HTML标签都删掉 完整的过滤器文档可以参考Jinja2文档Flask-Bootstrap是一个与模板相关的扩展，使用这个扩展可以方便的生成美观的模板文件。 控制结构Jinja2提供了多种控制结构，可以用来改变模板的渲染流程。if语句：12345&#123;% if user %&#125; Hello, &#123;&#123; user &#125;&#125;&#123;% else %&#125; Hello, Stranger!&#123;% endif %&#125; for语句：12345&lt;ul&gt; &#123;% for comment in comments %&#125; &lt;li&gt;&#123;&#123; comment &#125;&#125;&lt;/li&gt; &#123;% endfor %&#125;&lt;/ul&gt; 可以看出Jinja2的语句是用{加%来做闭合标记的。 宏、代码片段、模板继承Jinja2支持宏，类似于Python中的函数：123456789&#123;% macro render_comment(comment) %&#125; &lt;li&gt;&#123;&#123; comment &#125;&#125;&lt;/li&gt;&#123;% endmacro %&#125;&lt;ul&gt; &#123;% for comment in comments %&#125; &#123;&#123; render_comment &#125;&#125; &#123;% endfor %&#125;&lt;/ul&gt; 类似于Python的模块，Jinja2的宏可以存放在一个单独的文件中，使用时从中导入，以此实现宏（函数）的复用，123456&#123;% import 'macros.html' as macros %&#125;&lt;ul&gt; &#123;% for comment in comments %&#125; &#123;&#123; macros.render_comment(comment) &#125;&#125; &#123;% endfor %&#125;&lt;/ul&gt; 除了宏，代码片段也可以复用，可以把需复用的代码片段单独保存到一个文件，使用时调用include引入，类似C语言的头文件，1&#123;% include 'common.html' %&#125; 更强大的代码复用是模板继承，类似Python中的类的继承，有基模板和子模板之分。创建名为base.html的基模板：1234567891011&lt;html&gt;&lt;head&gt; &#123;% block head %&#125; &lt;title&gt;&#123;% block title %&#125;&#123;% endblock %&#125; - My Application&lt;/title&gt; &#123;% endblock %&#125; &lt;/head&gt;&lt;body&gt; &#123;% block body %&#125; &#123;% endblock %&#125;&lt;/body&gt;&lt;/html&gt; 子模板继承基模板如下：12345678910&#123;% extends "base.html" %&#125;&#123;% block title %&#125;Index&#123;% endblock %&#125;&#123;% block head %&#125; &#123;&#123; super() &#125;&#125; &lt;style&gt; &lt;/style&gt;&#123;% endblock %&#125;&#123;% block body %&#125;&lt;h1&gt;Hello, World!&lt;/h1&gt;&#123;% endblock %&#125;]]></content>
+      <tags>
+        <tag>web</tag>
+        <tag>python</tag>
+        <tag>flask</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Go语言学习笔记]]></title>
+    <url>%2F2016%2F09%2F04%2Fthe-golang-note%2F</url>
+    <content type="text"><![CDATA[简述环境及结构一个Go语言编写的程序存放于一个或多个以.go为后缀的源文件中，每个源文件以包的声明语句开始，表明该源文件属于哪个包。包声明语句后为import语句，导入其它依赖包。然后是包一级的类型、变量、常量和函数的声明语句。包一级的各种声明的顺序无关紧要，但函数内部的名字必须先声明才能使用。 包和文件 命名Go语言中的变量名、常量名、类型名、语句标号、函数名和包名有统一的命名规则：一个名字必须以一个字母（Unicode字母）或下划线开头，后面可以跟任意数量的字母、数字或下划线，区分大小写。有25个关键字不能当作名字使用，有约30多个预定义名字应用与内建的常量、函数等，可以被重新覆盖定义使用。函数内部定义的名字，只在函数内部有效；函数外部定义的名字则整个包都可以访问，可以称这种名字为包级名字。包级名字首字母的大小写决定了名字在包外的可见性，如果一个包级名字以大写字母开头，意味着该名字将是导出的，也就是可以被外部包访问。命名习惯上优先使用驼峰式，而不是优先使用下划线式分隔。 变量 变量的声明和初始化var关键字用来声明变量，包括变量的名字、类型和初始值，基本格式为：1var 变量名字 变量类型 = 表达式 其中类型和表达式部分可以省略其中一个部分，如果省略类型，则会根据初始化表达式推导变量类型，如果省略表达式，则会给变量默认赋值，整型为0，字符串型为空字符串，布尔型为false，接口和引用型为nil，数组或结构体等聚合类型各个元素为其相应零值。所以，Go语言中不存在未初始化的变量。也可以在一条声明语句中声明多个变量，在省略变量类型信息时可以同时声明多个不同类型的变量，如下：12var j, k, l intvar a, b, s = 2, true, &quot;hello&quot; 初始化表达式可以是字面量也可以是任何表达式或调用函数返回值。包级别的声明变量会在main入口函数执行前完成初始化，局部变量会在执行到声明语句时完成初始化。在函数内部，可以使用一种简短变量声明格式来声明和初始化变量：变量名字 := 初始化表达式,会根据表达式的值来推导变量类型，例子如下：123anim := gif.GIF&#123;LoopCount: nframes&#125;freq := rand.Float64() * 3.0t := 0.0 同var一样，简短变量声明也可以用来声明多个变量，但需注意:=是一个变量声明语句，=是变量赋值操作，请勿混淆。123i, j := 1, 2 //使用简短格式声明变量i,j且分别赋值为1，2i, j = 1, 2 //使用变量i,j分别赋值为1,2i, j = j, i //交互i,j的值 有一个细节需注意，:=左边的变量并不全是刚刚声明的，可能是之前已经声明过的变量，那该变量在这个声明语句里只有赋值行为。简短变量声明要求至少有一个新变量，如果:=全是之前已声明的变量，则编译不通过。除了上面两种声明初始化变量的方法外，还可以通过new函数来创建一个变量。表达式new(T)将创建一个T类型的匿名变量，初始化为T类型的零值，然后返回变量地址，返回的指针类型为*T。1234p := new(int) // p, *int 类型, 指向匿名的 int 变量fmt.Println(*p) // &quot;0&quot;*p = 2 // 设置 int 匿名变量的值为 2fmt.Println(*p) // &quot;2&quot; new函数创建变量和上面两种方法并没有什么不一样，可以理解为一种语法糖。 变量赋值使用赋值语句可以更新一个变量的值，最简单的格式是将变量名放到=左边，将新值表达式放到=右边。1234x = 1 // 命名变量的赋值*p = true // 通过指针间接赋值person.name = &quot;bob&quot; // 结构体字段赋值count[x] = count[x] * scale // 数组、slice或map的元素赋值 特定的二元算数运算符和赋值语句有简洁的写法：`` a *= b // 等同于 a = a * b ··· 数值变量同时支持++和–这种自增自减语句（注意是语句，不是表达式）。 元组赋值是另一种形式的赋值语句，它允许同时更新多个变量值。它会先对=`右边的表达式进行计算，然后统一更新左边对应变量的值。 条件控制]]></content>
+      <tags>
+        <tag>go</tag>
+        <tag>编程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu16.04启动错误解决-Failed to start lxd]]></title>
+    <url>%2F2016%2F07%2F19%2Fubuntu-fail-lxd%2F</url>
+    <content type="text"><![CDATA[最近刚装的Ubuntu 16.04，在启动的时候发现报错：1Faile to start lxd 搜索资料，应该是系统的一个bug，在更新后需手动重启一下lxd服务：1sudo service lxd restart 再次重启后，错误消失，lxd可正常启动。具体原因未知。 参考文档Ubuntu server 16.04 won’t boot after installation, Fail to start LXD]]></content>
+      <tags>
+        <tag>troubleshooting</tag>
+        <tag>ubuntu tips</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu16.04因网络接口异常导致启动时间过长问题解决]]></title>
+    <url>%2F2016%2F07%2F19%2Fubuntu-raise-network-interfaces%2F</url>
+    <content type="text"><![CDATA[在折腾Ubuntu16.04时，因网络接口异常，重启服务无效后，重启了系统，在启动时因网络接口异常，多了5分钟的等待时间，一直显示：1a start job is running for raise network interfaces 搜索资料，发现时ubuntu在启动的时候会检测网络接口的情况，无连接或连接异常时就会有一个等待时间，默认时5分钟，可以编辑配置文件/etc/systemd/system/network-online.targets.wants/networking.service修改这个默认时间。123sudo vi /etc/systemd/system/network-online.targets.wants/networking.service# 修改等待时间TimeoutStartSec=5min 重置一下后台程序：1sudo systemctl daemon-reload 参考文档A start job is running for raise network interfaces (5 mins 1 sec) in ubuntu16.04]]></content>
+      <tags>
+        <tag>troubleshooting</tag>
+        <tag>ubuntu tips</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu下apt-get不能自动补全问题解决]]></title>
+    <url>%2F2016%2F07%2F18%2Fubuntu-apt-get-completion%2F</url>
+    <content type="text"><![CDATA[昨天刚装的Ubuntu16.04今天发现apt-get不能自动补全了，爬网找了一下，大部分原因可能是缺少bash_completion这个包，安装一下即可。首先，可以查看~/.bashrc里面关于自动补全的配置项：12345678910# enable programmable completion features (you don't need to enable# this, if it's already enabled in /etc/bash.bashrc and /etc/profile# sources /etc/bash.bashrc).if ! shopt -oq posix; then if [ -f /usr/share/bash-completion/bash_completion ]; then . /usr/share/bash-completion/bash_completion elif [ -f /etc/bash_completion ]; then . /etc/bash_completion fifi 可以看到需要加载bash_completion这个组件，在/usr/share/bash-completion/bash_completion或/etc/bash_completion这两个路径里可以找到。手动查看，这两个路径都不存在该组件，应该是没有安装，重新安装一下：12$ sudo apt-get install bash-completion$ source /etc/bash_completion 重新补全一下，可以了。不能补全的原因可能很多，这是其中一个，可以参考一下。 参考文档让apt-get的自动补全打开]]></content>
+      <tags>
+        <tag>Ubuntu</tag>
+        <tag>apt-get</tag>
+        <tag>自动补全</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu下查看软件包版本]]></title>
+    <url>%2F2016%2F07%2F18%2Fubuntu-show-package-version%2F</url>
+    <content type="text"><![CDATA[Ubuntu中可以通过apt-show-versions工具来查看已安装的软件包版本。12$ sudo apt-get install apt-show-versions$ apt-show-versions |less 通过apt-cache show命令查看源中软件包版本，方便确认源中是否有需要的版本。123456789101112131415161718192021222324252627$ sudo apt-cache show nginxPackage: nginxPriority: optionalSection: webInstalled-Size: 37Maintainer: Ubuntu Developers &lt;ubuntu-devel-discuss@lists.ubuntu.com&gt;Original-Maintainer: Kartik Mistry &lt;kartik@debian.org&gt;Architecture: allVersion: 1.10.0-0ubuntu0.16.04.2Depends: nginx-core (&gt;= 1.10.0-0ubuntu0.16.04.2) | nginx-full (&gt;= 1.10.0-0ubuntu0.16.04.2) | nginx-light (&gt;= 1.10.0-0ubuntu0.16.04.2) | nginx-extras (&gt;= 1.10.0-0ubuntu0.16.04.2), nginx-core (&lt;&lt; 1.10.0-0ubuntu0.16.04.2.1~) | nginx-full (&lt;&lt; 1.10.0-0ubuntu0.16.04.2.1~) | nginx-light (&lt;&lt; 1.10.0-0ubuntu0.16.04.2.1~) | nginx-extras (&lt;&lt; 1.10.0-0ubuntu0.16.04.2.1~)Filename: pool/main/n/nginx/nginx_1.10.0-0ubuntu0.16.04.2_all.debSize: 3498MD5sum: c37e2d2b0c38e322b5b61f485d6890c3SHA1: e01524fcc4b0cbe1b768ab46dcf33d9443ce194fSHA256: 2ff41532bfa469db168d8c0c68e22ffd551c7200747f54788b044f9239a45f58Description-en: small, powerful, scalable web/proxy server Nginx ("engine X") is a high-performance web and reverse proxy server created by Igor Sysoev. It can be used both as a standalone web server and as a proxy to reduce the load on back-end HTTP or mail servers. . This is a dependency package to install either nginx-core (by default), nginx-full, nginx-light, or nginx-extras.Description-md5: 2d277b9313aa50e3bfd675e64b49532cHomepage: http://nginx.netBugs: https://bugs.launchpad.net/ubuntu/+filebugOrigin: UbuntuSupported: 5y 参考文档Apt和dpkg快速参考ubuntu 查看软件包版本]]></content>
+      <tags>
+        <tag>ubuntu tips</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu 16.04下安装nginx]]></title>
+    <url>%2F2016%2F07%2F17%2Fubuntu-nginx%2F</url>
+    <content type="text"><![CDATA[由于最近在玩zabbix,其需要LNMP的支持，所以又手动把各个组件安装一遍，熟悉熟悉流程，看看最新版本安装变化。这里写一下nginx的安装过程，系统环境为Ubuntu 16.04，记录以备忘，供以后查询。linux下的程序安装，目前的理解，按是否需要编译划分为两类。一类是不需要编译，即直接安装别人编译好的二进制文件，常见的就是通过包管理工具安装别人打包好的二进制文件，如rpm、deb。或者通过yum或apt在线从系统源里面下载安装。或者直接安装编译好的二进制文件；另一类是需要在本地编译安装的情况，一般就是下载源码后，自行configure、make、make install三板斧编译安装。nginx的安装参考官网文档分别使用源安装和源码编译安装。 通过官方源安装nginx 主流发行版自带系统源里应该都包含nginx相关的程序，但一般不能保证是最新版本。这里我们参考官方文档,在Ubuntu源列表里添加nginx的官方源，以此来获取到最新的版本。修改源列表，添加nginx官方源地址：1234sudo vi /etc/apt/sources.list# codename修改为相应系统代号，Ubuntu 16.04为xenialdeb http://nginx.org/packages/debian/ codename nginxdeb-src http://nginx.org/packages/debian/ codename nginx 下载nginx的签名密钥并添加到系统中，更新源信息，安装nginx:1234wget http://nginx.org/keys/nginx_signing.keysudo apt-key add nginx_signing.keyapt-get updateapt-get install nginx 通过源码编译安装nginx 从官网下载源码包，解压，编译，安装：12345wget http://nginx.org/download/nginx-1.10.1.tar.gztar zxvf nginx-1.10.1.tar.gz./configure --prefix=/usr/local/nginx-1.10.1makemake install 编译的时候可根据需要的功能模块添加指定参数，具体信息可参考官方文档。编译安装可能会不便于管理，最好能指定prefix，方便后续的管理。 启动、关闭、重置nginx 123/usr/local/nginx-1.10.1/sbin/nginx //启动/usr/local/nginx-1.10.1/sbin/nginx -s stop //关闭/usr/local/nginx-1.10.1/sbin/nginx -s reload //重置 参考文档nginx安装(1) – ttlsa教程系列之nginxBuilding nginx from Sources]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>nginx</tag>
+        <tag>ubuntu</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[linux下踢出已登陆用户]]></title>
+    <url>%2F2016%2F07%2F10%2Fkill-login-user%2F</url>
+    <content type="text"><![CDATA[Linux下强制踢出用户: 查看当前用户信息同一用户重复登陆会显示同一个用户名，但tty不同。 123456hi@pad-vbox-ubuntu:~$ w 13:41:59 up 1 day, 16:29, 2 users, load average: 0.00, 0.02, 0.00USER TTY FROM LOGIN@ IDLE JCPU PCPU WHAThi tty1 13:17 24:23 0.44s 0.35s -bashhi pts/3 127.0.0.1 13:36 0.00s 0.37s 0.00s whi@pad-vbox-ubuntu:~$ 使用pkill踢出指定用户 1pkill -kill -t 用户tty]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>shell</tag>
+        <tag>kill</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Systemd管理自定义的开机启动项]]></title>
+    <url>%2F2016%2F06%2F30%2Fsystemd-rclocal%2F</url>
+    <content type="text"><![CDATA[之前一直使用的rc.local管理一些自定义的开机启动项，基本上就是一些简单的一句话脚本这类。昨天，由Ubuntu 14.04直接升级到了Ubuntu 16.04，发现系统已更滑Systemd作为系统管理工具了，但之前的rc.local就失效了。搜索解决方案，Systemd中可以使用rc-local.service来使用原来的rc.local文件。 编辑或新建/usr/lib/systemd/rc-local.service文件，修改为以下内容： 12345678910111213[Unit]Description=/etc/rc.d/rc.local CompatibilityAfter=network.target[Service]Type=forkingExecStart=/etc/rc.d/rc.local startTimeoutSec=0RemainAfterExit=yesSysVStartPriority=99[Install]WantedBy=multi-user.target 原rc.local文件保持不变，使用systemctl命令测试，无异常后把rc-local.service加入开机启动项。 123systemctl status rc-local.servicesystemctl enable rc-local.servicereboot 参考链接：Systemd 管理开机自定义启动项 rc.local (Fedora18)]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>ubuntu</tag>
+        <tag>systemd</tag>
+        <tag>rc.local</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[githug过关记录]]></title>
+    <url>%2F2016%2F06%2F28%2Fgithug-note%2F</url>
+    <content type="text"><![CDATA[以目前的水平，在玩githug中有很多级别还需要搜索才能解决，零碎问题，记录备忘。12345Name: rmLevel: 11Difficulty: **A file has been removed from the working tree, however the file was not removed from the repository. Find out what this file was and remove it. 题目为 在工作区删除了文件，找到这个文件并在版本库里面删除。参考廖雪峰的教程，解答如下：123git status //查看删除的文件git rm filename //删除版本库中的文件git commit -m 'remove filename' //提交本次更改]]></content>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[基于SNMP协议的监控软件调试]]></title>
+    <url>%2F2016%2F06%2F14%2Fsnmp-monitor%2F</url>
+    <content type="text"><![CDATA[MRTG是一个基于SNMP的监控软件，虽然是一个比较老旧的软件且有其它很多优秀的替代品，但由于某些原因，最近在搭建一个基于MRTG的小型监控系统。在调试配置及运维排错过程中免不了要查到它的数据来源，由此，顺便简单的学习了一下SNMP相关的内容，记录以备忘。 SNMP概述SNMP实操首先，我们需通过工具获取到原始的snmp信息。流程基本是这样的：通过一个客户端工具访问snmp代理，得到其返回的原始数据信息，通过查询对应的MIB，解析原始数据以分析。RHEL下有一个snmpwalk的工具可以方便的获取snmp信息，简单安装使用如下：123yum install net-snmp-utilssnmpwalk -v 1 -c 123456 localhost #-v指定snmp版本，-c指定读写串，最后是主机。返回以MIB变量标识的各项参数snmpwalk -v 1 -c 123456 -On localhost #返回以OID标识的各项参数 返回的信息需通过查询MIB才能明白具体含义，RHEL里的MIB文档在/usr/share/snmp/mibs目录下。常用监控信息记录如下： 主机信息sysName.0 主机名称 CPU统计系统负载OID 1231 minute Load: .1.3.6.1.4.1.2021.10.1.3.15 minute Load: .1.3.6.1.4.1.2021.10.1.3.215 minute Load: .1.3.6.1.4.1.2021.10.1.3.3 内存统计.1.3.6.1.2.1.25.2.2.0 内存大小 磁盘统计 网络统计首先需要确定要监控接口的MIB变量名称或者OID，可以使用ifName或ifDescr字段来查看，更详细信息可以参考usr/share/snmp/mibs/IF-MIB.txt文档。 123snmpwalk -v 2c -c 123456 localhost ifNameIF-MIB::ifName.1 = STRING: loIF-MIB::ifName.2 = STRING: eth0 由以上返回值可知，eth0接口的序号为2，该序号方便下一步获取准确的信息。获取该端口已发送流量：12snmpwalk -v 2c -c 123456 localhost ifOutOctets.2IF-MIB::ifOutOctets.2 = Counter32: 534095 注意这个数值的单位为Byte，该数值表征端口已发送流量，非实时流量速度，数值大小应和ifconfig命令查询到的大小基本一致。如果要获取一段时间内的流量速度，可以分别两次获取该值进行计算。通过以上两个字段，可以简单的手动统计网络接口的流量情况，可以写一个简单的脚本进行自动统计，也可以用来和自动化监控工具核对调试。监控节点当家已建立的TCP连接数，使用以下参数12snmpwalk -v 2c -c 123456 localhost .1.3.6.1.2.1.6.9.0TCP-MIB::tcpCurrEstab.0 = Gauge32: 3]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>mrtg</tag>
+        <tag>snmp</tag>
+        <tag>监控</tag>
+        <tag>运维</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Linux账户密码过期问题]]></title>
+    <url>%2F2016%2F06%2F13%2Flinux-passwd-expires%2F</url>
+    <content type="text"><![CDATA[今天在登陆公司服务器的时候，发现被要求要先更改密码，想到应该是账户密码过期了。之前也翻看过一些密码策略方面的文章，零零碎碎的，看完就忘，这次趁着机会，把这块记录一下，备忘及促进体系化。理论性的东西学习后稍后补充进来，先写一下实操部分。 设置新用户缺省密码有效期修改配置文件/etc/login.defs，该设置只对新建用户生效，对于已存在的用户则需使用其他命令手动修改。12345vi /etc/login.defsPASS_MAX_DAYS 99999PASS_MIN_DAYS 0PASS_WARN_AGE 7 配置文件中，有三个键值需关注。 PASS_MAX_DAYS 表示密码过期最大间隔，即从最近一次更改密码开始计算，多少天后该密码过期，99999表示永不过期。从下面一个字段统一的角度来理解也可以，表示更改密码的最大间隔，即超过这个间隔后必须更改密码。 PASS_MIN_DAYS 表示更改密码的最小间隔，即距离最近一次更改密码的时间小于该值则不允许更改密码。0表示任何时候都可以更改。 PASS_WARN_AGE 表示密码过期前多少天提醒用户修改密码。 设置某个用户的密码有效期有两个命令可以实现该功能，passwd和chage。我这里使用了chage，记录如下。 chage常用参数如下： -m 密码可更改的最小天数。为零时代表任何时候都可以更改密码。-M 密码保持有效的最大天数。-W 用户密码到期前，提前收到警告信息的天数。-E 帐号到期的日期。过了这天，此帐号将不可用。-d 上一次更改的日期-i 停滞时期。如果一个密码已过期这些天，那么此帐号将不可用。-l 列出当前的设置。由非特权用户来确定他们的密码或帐号何时过期。 查看用户密码有效状态12345678$ chage -l usernmaeLast password change : Mar 23, 2016Password expires : neverPassword inactive : neverAccount expires : neverMinimum number of days between password change : 0Maximum number of days between password change : 99999Number of days of warning before password expires : 7 修改密码过期天数如上列表中的信息，密码过期的日期=上次修改密码日期+密码变更最大天数使用chage的-M参数即可实现修改密码变更最大天数的值，以达到修改密码过期日期的目的。 123456789$ chage -M 10 username$ chage -l usernameLast password change : Mar 23, 2016Password expires : Apr 02, 2016Password inactive : neverAccount expires : neverMinimum number of days between password change : 0Maximum number of days between password change : 10Number of days of warning before password expires : 7]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>expires</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[crontab任务关闭mail发送]]></title>
+    <url>%2F2016%2F06%2F12%2Fcrontab-mail-fix%2F</url>
+    <content type="text"><![CDATA[在系统中创建了crontab定时任务后，会一直向用户邮箱发送任务执行的相关信息。之前见过一篇帖子，说是没有处理这些邮件的情况，造成用户目录存储满了，系统无法登陆。今天在配置mrtg的时候，配置定时任务的确不停的向root邮箱发送邮件。爬网找到解决方法，记录之。 修改crontab配置12vi /etc/crontabMAILTO=root #注释掉这一句 未验证该方法，有提到该方法无效的情况。 重定向任务输出在crontab中的每个定时任务后做重定向即可避免发送邮件的情况。12*/1 * * * * /home/some.sh &gt;/dev/null 2&gt;&amp;1*/1 * * * * /home/some.sh &gt;/var/log/crontab.log 2&gt;&amp;1 把任务信息重定向到黑洞或日志文件中即可。]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>crontab</tag>
+        <tag>mail</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Linux下搭建mrtg性能监控平台]]></title>
+    <url>%2F2016%2F06%2F07%2Flinux-mrtg%2F</url>
+    <content type="text"><![CDATA[mrtg是一款流量监控工具，目前来说比较古老了，且有很多优秀的监控工具来替代。但公司平台在用，硬着头皮爬网学习了一下，对内心抵触的技术学习起来的确是积极性不高，这个虽算不上什么技术，但一个小工具要配置妥当也是费了些时间，为了时间心血不白白浪费，记录下来，以期梳理备忘之目的。 安装手动安装有一些依赖包要安装，这里先略过，可从源里直接装：1sudo apt-get install mrtg 调试 生成配置文件1cfgmaker --output /file/path/xxx.cfg public@host_ip cfgmaker是mrtg自带的一个配置文件生成工具，如果系统环境变量里面未加入，可以在mrtg安装目录下找找。--output指定生成的配置文件存放位置。public为对应主机snmp的读字符串，如果有多个主机，可以以空格分隔依次填入。 修改配置文件之前已生成了一个mrtg的配置文件，下面可以对该文件进行一些调整以满足各种需求。1vi /file/path/xxx.cfg 修改工作目录，去掉#，修改Worddir后面的路径未要指定的工作目录，该目录会存放mrtg生成的各种文件，如果需在远程通过web访问mrtg信息，需配置该目录为web服务器活动目录。修改图表单位，去掉#，Options[_]:growright,bits为默认图表单位。使用中文，加入一行Language:Chinese。需注意MRTG不支持UTF8编码，使用中文的话只能使用GB2312编码，须在Web服务器端做相应的设置。12WorkDir: /the/path/mrtg 存放日志文件和网页文件Refresh: 600 浏览器页面刷新间隔(秒)，不设置则默认300 使用 生成监控信息env LANG=C mrtg /file/path/xxx.cfg一般情况下需指定环境变量env LANG=C,该命令会在配置文件中指定的工作目录下生成mrtg监控信息文件，需多次执行，直到不再报错。 生成页面文件indexmaker --output /web/html/index.html /file/path/xxx.cfgmrtg自带一个简单的网页生成工具indexmaker，可以把mrtg监控信息简单的汇总在一个网页里，方便web访问使用。 自动刷新使用corntab实现自动刷新监控数据。*/5 * * * * env LANG=C /usr/bin/mrtg /file/path/xxx.cfg 配置文件简单说明MRTG的简单使用仅需对生成的配置文件做一些基本调整即可，但要更进一步的调整还需参考官方文档，甚至查看SNMP的一些相关知识。这里对配置文件做简单的注释说明。主配置文件可由cfgmaker生成，也可以自己手动新建配置文件。主配置文件可以包含其它配置文件，使用如下语法加入：1Include: ./server22.cfg 如果使用相对路径，会同时搜索当前工作目录和主配置文件工作目录，当前工作目录优先。配置文件基本上为对各个变量的定义，以控制要监控的信息及最终生成图表。变量根据其作用范围分为全局变量和目标变量。目标变量为变量名称后面加上目标名称，表示该变量仅对该目标有效，目标变量会覆盖全局变量。MRTG可以监控多个目标，故配置文件里可以配置多个目标各自的变量，全局变量对所有目标都生效。这里的多个目标可以是多个监控节点，也可以是一个监控节点上多个监控项目，比如内存、磁盘等，都可以作为单独目标来监控及配置。由此可见，MRTG初衷可能是一个流量监控软件，但通过配置调整，也可以监控其他项目。 TargetTarget定义要监控的目标，并且要给该目标初始化一个唯一的名称，属于该目标的变量在变量名后都需加上该名称。在配置文件的内容安排上，一般全局变量写在开始部分，目标变量写在每个Target定义之后。Target的定义格式有多种，下面说一下常用的几种。 基础格式 12345#port:community@router#port为预监控节点的监控接口#community为snmp的共同串，一般为public，需参考snmp配置情况，如果包含@或空格，需使用\来转义#@route 为主机名或ip地址Target[localhost-1]: 2:public@localhost 反转格式有时候可能根据观察的方向会需要反转出站和入站的流量图表，这时候可以通过在Target名称加一个-符号来快速实现。 12Target[localhost]: 1:public@localhostTarget[localhost]: -1:public@localhost 显式OIDs格式可以显式的声明要查询的OID来定义一个目标。MRTG需要两个变量来绘图，显式声明时必须包含两个OID。 12# OID_1&amp;OID_2:community@routerTarget[myrouter]: 1.3.6.1.2.1.2.2.1.14.1&amp;1.3.6.1.2.1.2.2.1.20.1:public@myrouter MIB变量格式和OID格式一样，可以通过MIB变量来定义一个目标。可能需要MIB库的支持。 1Target[myrouter]: ifInErrors.1&amp;ifOutErrors.1:public@myrouter 接口IP格式和基础格式一样，基础格式使用接口序号来确定一个接口，很多时候在目标的端口增删变动后，接口序号会发生变化，由此可能导致监控出错。这里使用接口的IP来确定一个接口，可应对这样的场景。并且，IP可以和其他格式配合使用。使用格式为/加IP地址，如/192.168.5.5 123Target[myrouter]: /1.2.3.4:public@wellfleet-fddi.domainTarget[ezci]: -/1.2.3.4:public@ezci-ether.domainTarget[myrouter]: ifInErrors/1.2.3.4&amp;ifOutErrors/1.2.3.4:public@myrouter 接口描述格式和接口IP格式一样，可用于需要的场景。使用格式为\加接口描述，如\eth0。 123Target[myrouter]: \My-Interface2:public@wellfleet-fddi.domainTarget[ezci]: -\My-Interface2:public@ezci-ether.domainTarget[myrouter]: ifInErrors\My-If2&amp;ifOutErrors\My-If3:public@myrouter MaxBytes表征监控变量的最大值，比如监控的一个千兆接口的网络流量，这个值可设定为125000000，即125M Bytes。这个值一般根据实际情况手动设定，值的大小会影响两个方面。数据采集方面，超过这个设定值的采集数据会被忽略。数据展示方面，在绘制固定Y轴长度的图表中，该值用来计算Y轴的最大值。 Title控制图表网页的标题，即浏览器标题栏或标签页标题栏的显示： 1Title[myrouter]: this a title PageTop定义生成的HTML页面的标题，区别于Title，这是浏览页面的首标题，非浏览器标题栏标题。 1PageTop[myrouter]: &lt;H1&gt;Traffic Analysis for ETZ C95.1&lt;/H1&gt; OptionsOptions变量可以设置一下布尔值的开关，来控制绘制图表。简单说一下几个常用的布尔值。 growright默认图表是从左向右增长推进的，更常用的可能是从右向左增长推进，故一般会在Options中设置该值。 bits设置该值会使所有采集数据乘以8在绘制图表中展现，即认为采集数据单位为Bytes，展现数据为bit。实际使用中应充分考虑实际采集数据单位，避免出现转换错误。 gauge表面意思为计量器，该值的意思为把采集的数据直接用于绘图展示。不设置该值，默认情况下，MRTG以计数器的方式处理采集的数据，比较两次的差值再除以时间间隔，得到的值用来绘图。这种情况用来处理网络流量是合理的，但在测定磁盘使用率，CPU负载，温度等类似的数据是可能需要设置gauge。 nopercent不显示使用百分比，有些监控项目不需要百分比，比如温度，TCP连接数，可以设置这个值。 noinfo在生成的web页面隐藏系统运行时间和主机名称信息。 示例1Options[myrouter]: growright, bits kilo更改单位换算的进制，默认为1000。主要为kib，mib，gib之间的换算设置，比如可以设置为1024。 1kilo[localhost]: 1024 kMG控制各个单位的前缀，使用逗号分隔，如果要跳过该前缀可以使用’-‘代替，如果不想要该前缀可以使用两个连续的逗号。 1kMG[myrouter]: K,M,G 注意这个参数会影响最终绘图的情况，参数的值为一个从左至右依次按进制递增的序列，序列的第一个值为采集数据的单位。如果理解不对可能会使绘制图形的单位不匹配，请尽量参考官方文档和手动调试观察。以采集网络流量为例，一般采集的原始数据单位为Bytes，但如上面代码配置，则会把采集的数据的单位当作KBytes，真实流量情况会被错误的放大1000倍。正确配置如下：1kMG[myrouter]: ,K,M,G 因为默认单位为b/s，和采集数据匹配，第一个逗号前留空即可。关于Bytes和bit之间的换算这里不考虑，这个换算受Options影响。这个字段关系到最终的数据展现精确问题，具体还需调试。 ShortLegend绘制图表中的最大值、平均值、当前值的默认单位字符串，默认为b/s。 Unscaled默认情况下，绘制的流量图表是根据实际情况进行缩放以便能清晰的观察流量情况。Unscaled关键字控制图表不进行缩放，以最大标尺进行显示，这在流量远低于最大值的情况下可能不利于观察。dwmyf分别表示天周月年四个图表。1Unscaled[localhost]: dwmy WithPeak默认情况下，图表绘制的值为一个平均值，这个参数可以让图表多一个峰值曲线。1WithPeak[localhost]: ym Suppress默认情况下mrtg会生成日、周、月、年四个维度的统计情况图表，该参数可以选择关闭某一个图表。1Suppress[localhost]: y]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>monitor</tag>
+        <tag>mrtg</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[syntax error near unexpected token `libgnutls,']]></title>
+    <url>%2F2016%2F05%2F30%2Fts-2%2F</url>
+    <content type="text"><![CDATA[在编译安装msmtp时碰到的错误，在执行./configure时，报如下错误：12./configure: line 7883: syntax error near unexpected token `libgnutls,'./configure: line 7883: ` PKG_CHECK_MODULES(libgnutls, gnutls &gt;= 0.0, HAVE_LIBGNUTLS=1, HAVE_LIBGNUTLS=0)' 查看邮件列表，需安装一个叫pkgconf的包，如下：1sudo aptitude install pkgconf 安装后需重新生成一下配置文件：1sudo autoreconf -i 参考链接 msmtp mailing lists]]></content>
+      <tags>
+        <tag>troubleshooting</tag>
+        <tag>msmtp</tag>
+        <tag>pkgconf</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Hexo使用相关记录]]></title>
+    <url>%2F2016%2F05%2F30%2Fhexo-use%2F</url>
+    <content type="text"><![CDATA[Hexo部署博客也是第一次上手，使用过程中碰到不少问题，记录下来以备忘。在编辑博客文章的.md文件时，需在文件开始部分输入一些基本属性数据来标志文章的一些属性，比如本篇文章的头部如下：12345678910111213---title: Hexo使用相关记录date: 2016-05-30updated: 2016-06-30author: himaotags: - blog - hexo - markdown---Hexo部署博客也是第一次上手，使用过程中碰到不少问题，记录下来以备忘。&lt;!--more--&gt;在编辑博客文章的`.md`文件时，需在文件开始部分输入一些基本属性数据来标志文章的一些属性，比如本篇文章的头部如下： 如上所示，title:表示文章标题，date:表示文章日期，author:表示文章作者，tags:表示文章的标签。注意所有的冒号后面都有一个空格。文件头部使用一对---包裹，类似于yaml的语法。在---之下为正文部分，正文按照markdown语法书写，&lt;!--more--&gt;标签之前的部分为文章摘要，首页展示该文章时会只显示摘要部分，方便浏览。 Markdown语法小记 换行 Markdown里面的换行不能单纯的使用回车来实现。需要在行尾加两个空格。 无序列表 像当前条目一样的无序列表，使用- 内容来实现。 行内代码 实现行内代码样式，如git log这样，可是使用两个反引号实现，如`git log` 内部链接 实现超链接功能，[页面文字](文字链接)。 外部链接 实现超链接功能，所有链接可统一放到文档底部。[页面文字][数字序号1234],文档底部[数字序号1234]: http链接地址。 表格 markdown语法实现表格如下： 123字段1|字段2-|-值1|值2 效果如下： 字段1 字段2 值1 值2 表格要与上面的文本内容空一行，否则解析不出来。第二行的-|-表示该列对齐方式，默认为-表示左对齐，还有:-:表示居中对齐，-:表示右对齐。 参考：作业部落]]></content>
+      <tags>
+        <tag>blog</tag>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Nexus 5 刷机-原生镜像]]></title>
+    <url>%2F2016%2F05%2F29%2Fnexus5-flash-factory-images%2F</url>
+    <content type="text"><![CDATA[记录Nexus 5刷机过程，以备忘。 下载官方镜像：https://developers.google.com/android/nexus/images#hammerhead第三方Recovery(TWRP):https://twrp.me/devices/lgnexus5.htmlshadowsocks：https://apps.evozi.com/apk-downloader/?id=com.github.shadowsocksRoot文件(SuperSU):http://forum.xda-developers.com/apps/supersu/2014-09-02-supersu-v2-05-t2868133 备份资料：相片、通信录、APP 刷机首先电脑中需安装有adb驱动和fastboot工具，windows和linux均可，可参考官方镜像的指导页面。驱动和工具确认可用后，重启手机进入fastboot模式，即关机后，同时按下电源键和音量减键，直到出现维修机器人界面。连接电脑和手机，在电脑上解压下载的官方镜像包，进入解压目录，执行flash-all.bat文件即可开始刷机。该操作会清空手机所有数据，注意备份。很多时候执行脚本直接刷机并不顺利，会报各种错误，如下:1archive does not contain 'boot.sig' 有时候报此类错误并不影响刷机成功，但有时会提示刷机失败，此时需手动分别把各个镜像刷进手机，解压img的zip包，得到各个镜像，使用命令依次刷入：12345fastboot flash cache cache.imgfastboot flash userdata userdata.imgfastboot flash recovery recovery.imgfastboot flash boot boot.imgfastboot flash system system.img 常规手动刷机如上，有时候版本更新会同时更新bootloader和基带，此时也需要手动刷入，一般在img的zip包外。1234fastboot flash bootloader bootloader-*.imgfastboot reboot-bootloaderfastboot flash radio radio*.imgfastboot reboot-bootloader 以上镜像正确刷入后，刷机即完成。可以在手机fastboot模式重启，或fastboot命令重启：1fastboot reboot 重启前，建议把sim卡拔出，方便系统第一次启动跳过连接google服务器步骤，如果网络无问题，可不考虑。确定系统启动正常，打开开发者模式，使能adb调试，连接计算机，使用adb命令安装已下载的shadowsock。1adb install xxx.apk 确定扶墙正常，重启进入bootloader模式，刷入第三方recovery。1fastboot flash recovery twrp.img 刷入完成，在手机上选择Recovery Mode，然后手动进入recovery模式。直接重启会导致刷入第三方recovery失败，参考这里。 Note many devices will replace your custom recovery automatically during first boot. To prevent this, use Google to find the proper key combo to enter recovery. After typing fastboot reboot, hold the key combo and boot to TWRP. Once TWRP is booted, TWRP will patch the stock ROM to prevent the stock ROM from replacing TWRP. If you don’t follow this step, you will have to repeat the install. ROOT在有第三方Recovery的情况下，root系统比较方便，下载supersu，放入手机存储内，进入第三方recovery，安装即可。 其他 关掉网络连接的叹号123adb shellsettings put global captive_portal_detection_enabled 0reboot]]></content>
+      <tags>
+        <tag>数码</tag>
+        <tag>Nexus</tag>
+        <tag>手机</tag>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[possibly undefined macro: AM_GNU_GETTEXT]]></title>
+    <url>%2F2016%2F05%2F28%2Fts-1%2F</url>
+    <content type="text"><![CDATA[今天在通过源码安装msmtp·时，执行autoreconf -i`报错 1possibly undefined macro: AM_GNU_GETTEXT 通过搜索，应是要安装gettext这个GNU的软件包，可通过源或者源码安装。 源安装1sudo aptitude install gettext 通过源安装的版本可能会比较老旧，造成其他软件无法使用及各种报错情况，下面使用源码安装，可以得到最新的版本。 源码安装下载从官网下载(可能有墙）http://www.gnu.org/software/gettext/12wget http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.7.tar.lzwget http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.7.tar.lz.sig 解压12lzip -d gettext-0.19.7.tar.lz tar -xvf gettext-0.19.7.tar 编译&amp;安装123sudo ./configuresudo makesudo make install]]></content>
+      <tags>
+        <tag>troubleshooting</tag>
+        <tag>msmtp</tag>
+        <tag>gettext</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Linux下压缩与解压缩]]></title>
+    <url>%2F2016%2F05%2F27%2FLinux%E4%B8%8B%E5%8E%8B%E7%BC%A9%E4%B8%8E%E8%A7%A3%E5%8E%8B%E7%BC%A9%2F</url>
+    <content type="text"><![CDATA[Linux下有多种压缩工具，在时间、资源占用、最终效果上各不相同，不同场景下可能会选择不同的方式进行处理，这里列举常用的方法记录备忘。 快速上手表格 概述 tar.gz tar.bz2 tar.xz tar zip 压缩 解压 打包并压缩 解压并解包 .tar.lz的压缩与解压缩Linux下对.tar.lz文件的压缩和解压缩需要lzip和lunzip包的支持。1sudo apt-get install lzip lunzip 解压12lzip -d gettext-0.19.7.tar.lz tar -xvf gettext-0.19.7.tar .tar.xz的压缩与解压缩tar xvJf *.tar.xz]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>tar</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Ubuntu下使用mutt+msmtp发送邮件]]></title>
+    <url>%2F2016%2F05%2F27%2Fubuntu-mutt-msmtp%2F</url>
+    <content type="text"><![CDATA[linux下发送邮件是很常见的场景，之前使用mail发送邮件，这里试试mutt+msmtp发送邮件的玩法。关于linux下mail及mail服务器的相关知识及操作实践，稍后另行补充。 邮件发送的基本流程为：MUA-MTA-MTA...MTA-MTA-MUA,分别介绍各个部分组件。 邮件传输代理（Mail Transport Agent,MTA)邮件传输代理，理解为邮件服务器。Linux下常见的MTA有sendmail、postfix等，配置起来都比较复杂，基本可以理解为搭建邮件服务器的核心部分了。 邮件用户代理（Mail User Agent,MUA)邮件用户代理，理解为邮件客户端。Linux下常用的MUA有mail、mailx、mutt。 mutt安装mutt1$ sudo aptitude install mutt 安装完成后配置相关配置文件即可使用，mutt的配置文件主要使用的有两个：12/etc/Muttrc~/.muttrc /etc/Muttrc为系统全局配置，系统所有用户均可从该文件读取配置。~/.muttrc为用户配置，只对当前用户使用，会覆盖系统配置文件相关设置。一般修改系统配置文件/etc/Muttrc即可。123456vi /etc/Muttrcset sendmail="/usr/bin/msmtp"set from="xxx@163.com"set use_from=yesset envelope_from="yes"set realname="user_name" msmtpmsmtp是一个SMTP客户端，可是配合MUA来发送邮件，相对来说配置较为简单。先从源中安装1sudo aptitude install msmtp 一般源中的版本比较老旧(又不是不能用），也可以从官网下载源码，自行编译安装。编译安装可能会有一些坑，请小心。简单的配置文件如下，详细的可参考范例配置文件一般配置SMTP服务器的一些信息，如主机名称、账户设置、TLS设置等等。msmtp是以账户来组织这些信息的，即每一个账户下都有一组SMTP服务器信息。一个配置文件可以存放多个账户的配置信息。以下为一个简单的账户配置，详细字段解释可参考官方手册。123456789101112131415161718# 账户名称，如果指定其他账户名称则需指定默认账户account default# SMTP服务器名称或地址host smtp.163.com# 设置发信人地址，可自定义，可以和邮件服务器账户不一致，不过要考虑邮件服务器的过滤策略。from zhangsan@163.com# 认证方式，其它认证方式参考官方手册auth plain# 登陆邮件服务器的用户名和密码，这里以明文显示密码，如需加密请参考官方手册user zhangsanpassword 123456# 日志存放位置，留空为关闭日志，'-'为输出到stdoutlogfile ~/.msmtp.log 关于发件人的部分，可以参考这部分手册内容。大意是邮件里书写的发件人和发送这封邮件的人可以不是一人。 7.1 Envelope-from addressThe SMTP server expects a sender mail address for each mail. This is the envelope-from address. It is independent of the From header (because it is part of the mail envelope, not of the mail itself), but in most cases both addresses are the same.Envelope-from addresses can be generated automatically (when auto_from is enabled) or set explicitly with the from command. 这是可能需要注意的地方，有些邮件服务器可能会对这种行为有过滤。所以，最好设置为一样的发件人。 发送邮件简单的发送附件如下：1echo "content"|mutt -s "subject" xxx@kindle.cn -a /file/path/file.tar.gz 参考链接muttrc_example msmtprc_example mutt_manual FreeBSD下如何使用mutt连接gmail msmtp项目介绍 [msmtp-users] Error in autoreconf -i msmtp manual]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>mail</tag>
+        <tag>mutt</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Linux下使用.sig文件验证签名]]></title>
+    <url>%2F2016%2F05%2F27%2Fhow-to-use-gpg-sig%2F</url>
+    <content type="text"><![CDATA[很多时候下载软件包都会提供一个.sig的签名文件，类似于md5checksum，都是用来验证文件完整性的，以确认下载的软件包没有被非法修改，这里记录下简单使用方法。1234567891011121314151617181920212223242526272829$ gpg --verify gettext-0.19.7.tar.lz.sig gettext-0.19.7.tar.lzgpg: directory `/home/hi/.gnupg' createdgpg: new configuration file `/home/hi/.gnupg/gpg.conf' createdgpg: WARNING: options in `/home/hi/.gnupg/gpg.conf' are not yet active during this rungpg: keyring `/home/hi/.gnupg/pubring.gpg' createdgpg: Signature made Mon 28 Dec 2015 10:30:51 AM CST using RSA key ID D7E69871gpg: Can't check signature: public key not found# 需导入公钥才能验证，根据以上得到的公钥ID导入对应公钥$ gpg --recv-keys D7E69871gpg: keyring `/home/hi/.gnupg/secring.gpg' createdgpg: requesting key D7E69871 from hkp server keys.gnupg.netgpg: /home/hi/.gnupg/trustdb.gpg: trustdb createdgpg: key D7E69871: public key "Daiki Ueno &lt;ueno@unixuser.org&gt;" importedgpg: no ultimately trusted keys foundgpg: Total number processed: 1gpg: imported: 1 (RSA: 1)# 继续刚才的验证$ gpg --verify --verbose gettext-0.19.7.tar.lz.sig gettext-0.19.7.tar.lzgpg: armor header: Version: GnuPG v1gpg: Signature made Mon 28 Dec 2015 10:30:51 AM CST using RSA key ID D7E69871gpg: using PGP trust modelgpg: Good signature from "Daiki Ueno &lt;ueno@unixuser.org&gt;"gpg: aka "Daiki Ueno &lt;ueno@gnu.org&gt;"gpg: WARNING: This key is not certified with a trusted signature!gpg: There is no indication that the signature belongs to the owner.Primary key fingerprint: 4622 25C3 B46F 3487 9FC8 496C D605 848E D7E6 9871gpg: binary signature, digest algorithm SHA1 可以看到有一句gpg: Good signature from &quot;Daiki Ueno &lt;ueno@unixuser.org&gt;&quot;，意思是该软件包签名未被破坏，验证完毕。 参考链接Linux下使用.sig签名文件验证签名]]></content>
+      <tags>
+        <tag>linux</tag>
+        <tag>gpg</tag>
+        <tag>验证文件</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Git 基础]]></title>
+    <url>%2F2016%2F05%2F26%2Fgit-base%2F</url>
+    <content type="text"><![CDATA[三种状态Git有三种状态，已修改，已暂存，已提交。 Git简单配置Git自带一个git config的工具来帮助设置Git外观和行为的配置变量.这些变量存储在三个位置: /etc/gitconfig文件:包含系统上每一个用户及他们仓库的通用配置,如果使带有--system选项的git config命令时,会从此文件读写配置变量. ~/.gitconfig 或 ~/.config/git/config 文件：只针对当前用户。 可传递 –global 选项让 Git 读写此文件. 当前使用仓库的 Git 目录中的 config 文件（就是 .git/config）：针对该仓库。 每一个级别会覆盖上一个级别的配置,即越靠近仓库的配置文件优先级越高.用户信息装完Git的第一个件事是设置用户名和邮箱,Git的每一次提交都会使用这些信息,会写入你的每一次提交中且不可修改.12git config --global user.name "haha"git config --global user.email haha@gmail.com 带--global参数的git config命令只需要运行一次，表示配置当前系统用户的全局变量，如需要根据具体项目配置用户名和邮箱信息，需在相关项目目录下运行不带参数的git config命令来配置。 检查配置信息1git config --list 该命令会列出Git能找出的所有配置变量，可能会有重复的变量名，因为会从不同的配置文件中读取所有变量。1git config user.name 使用该命令查询具体某一个变量名的配置。 获取帮助一下三种方法可以在脱机情况下获取Git命令的使用帮助：123git help &lt;command&gt;git &lt;command&gt; --helpman git-&lt;command&gt; 获取Git仓库两种方法可以创建Git仓库，一是本地初始化创建仓库，二是克隆远程仓库创建。123git initgit clone [远程仓库地址]git clone [远程仓库地址] &lt;本地仓库地址&gt; 检查当前文件状态1git status 跟踪新文件1git add [filename] 状态简览1git status -s git status命令输出较为详细，如果需简览可使用命令git status -s或者git status --short 查看提交信息1git log 不带任何参数的git log会列出每次提交的详细信息，主要有四个部分组成，SHA-1校验码、作者姓名和电子邮件、提交日期、提交说明。]]></content>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[python中简单实用json]]></title>
+    <url>%2F2016%2F05%2F25%2Fpython-json%2F</url>
+    <content type="text"><![CDATA[python多个库可以解析构造json数据，这里是内建json库简单使用记录。该库可以自字符串或文件中解析JSON，将其转化为python字典或列表，也可以将字典或列表转换为JSON字符串。 解析JSON123import json json_str = '&#123;"name":"hi", "age":"18"&#125;'parsed_json = json.loads(json_str) 上述代码将json字符串json_str转换为python字典parsed_json。 构造JSON123import jsondict = &#123;"name":"hi", "age":"18"&#125;json_str = json.dumps(dict) 上述代码将python字典dict转换为json字符串json_str。]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>json</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Python脚本中中文注释问题]]></title>
+    <url>%2F2016%2F05%2F25%2Fpython-chinese-comment%2F</url>
+    <content type="text"><![CDATA[python脚本中使用中文行注释，在VS Code中F5调试并无异常，在Windows命令行或Linux终端下运行，解释器对中文注释行报错，网上搜索解决方案为在文件头加上编码语句如下：1#-*-coding:utf-8-*- 脚本文件本身已经特意调整过编码，仍然出现乱码问题，必须加编码语句才正常，原因尚未排查，可能是切换环境混乱所致。]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>comment</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Git远程仓库相关操作]]></title>
+    <url>%2F2016%2F05%2F25%2Fgit-remote-repo%2F</url>
+    <content type="text"><![CDATA[添加远程仓库1git remote add remote_repo_ref remote_repo_url 其中remote_repo_ref为一个自定义的字符串名称，一般示例为orign，表示对远端仓库的引用；remote_repo_url为远端仓库的具体地址。1git remote add something_bak git@github.com:xxx/xxx.git 一般主流的git服务提供商都会提供两种形式远程仓库地址，SSH和HTTPS，自己搭建git服务器的话也可以配置多种访问形式。使用这两种形式的地址在对远程仓库操作时会有一些细微的差异。使用HTTPS形式的地址访问远程仓库，可能会需要提供相关账户和密码，类似于web端登录的操作。使用SSH形式的地址则需在账号或对应仓库中配置相关的key，确保正常认证。 查看已添加的远程仓库12git remotegit remote -v 拉取远程仓库数据这里有几个命令可以用来拉取远程仓库数据，可以根据不同的场景使用不同的命令。123git fetch [remote-name]git pull [remote-name]git clone [remote-name] git fetch命令会拉取所有本地仓库中没有的数据，但不会合并入本地分支，使用的前提是拥有本地仓库。git pull命令会拉取所有数据并尝试自动合并入本地分支。也是在拥有本地仓库的前提下操作。git clone命令会新建一个本地仓库并拉取远程仓库数据到本地仓库，默认添加一个名字为origin的远程仓库，自动设置本地仓库默认分支（一般是master）跟踪远程仓库默认分支（一般是master）。 推送数据到远程仓库推送数据到远程仓库只有一个命令，但是有复杂的控制选项及参数，详细用法参考官方手册。这里记录下几个较为常用的用法。12git push remote_repo_name local_branch:remote_branchgit push origin master:master 推送本地仓库master分支到远程仓库origin的master分支。最常用的直接使用git push来推送的命令事实上是上面命令的一个省略参数版本。 添加多个远程仓库1git remote add set-url remote_repo_ref remote_repo_url 对一个引用添加多个连接，这样会同时向多个远程仓库推送。 参考文档]]></content>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Python中Http库requests的简单使用]]></title>
+    <url>%2F2016%2F05%2F25%2Fpython-http-requests%2F</url>
+    <content type="text"><![CDATA[由于需要在python下调用一些web api，简单的学习了一下python的http相关操作，这里使用的是requests库，是为记录以梳理及备忘。requests不在标准库中，可能需要手动安装：1pip install requests 基本使用简单的向指定的url发送各种请求操作。12345678910import requestscs_url = 'http://httpbin.org'r = requests.get("%s/%s" % (cs_url, 'get'))r = requests.post("%s/%s" % (cs_url, 'post'))r = requests.put("%s/%s" % (cs_url, 'put'))r = requests.delete("%s/%s" % (cs_url, 'delete'))r = requests.patch("%s/%s" % (cs_url, 'patch'))r = requests.options("%s/%s" % (cs_url, 'get')) URL传参简单结构1&lt;协议&gt;://&lt;域名&gt;/&lt;接口&gt;?&lt;键1&gt;=&lt;值1&gt;&amp;&lt;键2&gt;=&lt;值2&gt; 示例如下：1http://cn.bing.com/search?q=http&amp;go=yes requests提供了一个名为params的参数，可以接受python字典，作为url传参的键值对，如下：12dic = &#123;'name':'hi', 'age':'18'&#125;r = requests.get(url, params = dic) 请求头很多时候需要构造自己的http报文头部，这里传入一个python字典类型的headers参数即可，如下：12my_header = &#123;'Content-Type':'application/json'&#125;r = requests.get(url, headers = my_header) 获取响应内容由以上简单使用，所有的请求都会返回一个response类对象，远端响应内容可从这个对象中提取，常用如下： 响应头1print r.headers 响应内容http内容在传输时一般会压缩后传送，requests会对经过gzip和deflate压缩的内容进行自动解包，以方便我们获取响应内容进行处理，可以从response.content获取以字节形式返回的响应内容。1print r.content 以上方法方便查看文本形式的响应内容，非文本的内容需进一步处理方能友好查看。 解析JSON内容很多时候需处理响应的json内容，requests无需其他json库即可解析返回的json内容，非常方便。1print r.json()[key] POST表单post方法可以传输一个表单数据至远端以处理，requests的post方法有一个data参数可以接收一个python字典作为表单数据。12dic = &#123;'name':'hi', 'age':'18'&#125;r = requests.post(url, data = dic) 参考链接Python HTTP 库：requests 快速入门]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>http</tag>
+        <tag>requests</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Git-分支-学习记录]]></title>
+    <url>%2F2016%2F05%2F23%2Fgit-branch%2F</url>
+    <content type="text"><![CDATA[记录学习git分支部分，阅读材料为git官方文档 分支简介Git的默认分支名称为master，master分支并不是一个特殊的分支，它跟其它分支并没有不同，之所以大部分仓库都有一个master分支，是因为git init命令默认创建它，并且大部人没有改动这个默认名称。 分支创建1git branch testing 这会在当前提交上创建一个名为testing的分支，注意该命令并不会切换到新建分支上，当前还是在原分支上。 分支切换1git checkout testing 这个命令会产生两个效果，一是使HEAD分支指向testing分支，二是将工作目录文件恢复为testing分支的快照。 创建并切换到分支1git checkout -b testing 合并分支1git merge testing 上面命令表示把testing分支合并入当前分支。 删除分支1git branch -d testing 删除testing分支，如果该分支未被合并，则会删除失败，如需强制删除，需使用-D参数，如下：1git branch -D testing 查看分支1git branch 不加任何参数的运行git branch会列出当前所有分支的列表，分支前*表示该分支为当前检出分支，当前的提交会更新到该分支。1git branch -v git branch -v会列出当前所有分支及每一个分支的最后一次提交。1git branch --merged git branch --merged会列出所有已合并入当前分支的分支列表，分支前*表示该分支为当前检出分支，未标*的分支均可删除，因为这些分支均已合并入当前分支了。1git branch --no-merged git branch --no-merged会列出所有未合并的分支，因为这些分支都包含了为合并的工作，所以尝试用git branch -d命令删除相关分支时会失败，强制删除未合并分支可用git branch -D命令。]]></content>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Hello World]]></title>
+    <url>%2F2016%2F05%2F22%2Fhello-world%2F</url>
+    <content type="text"><![CDATA[Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick StartCreate a new post1$ hexo new "My New Post" More info: Writing Run server1$ hexo server More info: Server Generate static files1$ hexo generate More info: Generating Deploy to remote sites1$ hexo deploy More info: Deployment]]></content>
+  </entry>
+</search>

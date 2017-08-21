@@ -1,0 +1,907 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="blog,hexo,daocloud,ci," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="曾经也为随时随地书写和部署hexo博客这种伪需求折腾过，因为非专业人士，最后想到的办法也就是把hexo目录全部传到github上，在其它地方安装hexo环境，拉下github仓库就可以部署了。这种方法，除了验证了一次的确可行外，事实上一次也没使用过（毕竟伪需求）。偶然看到有使用ci部署hexo博客的文章，细看工作流和上面的粗暴模式应该是一样的，只是把原来手动拉仓库部署变成了通知ci系统拉仓库部署，">
+<meta name="keywords" content="blog,hexo,daocloud,ci">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用daocloud持续集成部署hexo博客">
+<meta property="og:url" content="http://yoursite.com/2016/11/22/使用daocloud持续集成部署hexo博客/index.html">
+<meta property="og:site_name" content="海锚的博客">
+<meta property="og:description" content="曾经也为随时随地书写和部署hexo博客这种伪需求折腾过，因为非专业人士，最后想到的办法也就是把hexo目录全部传到github上，在其它地方安装hexo环境，拉下github仓库就可以部署了。这种方法，除了验证了一次的确可行外，事实上一次也没使用过（毕竟伪需求）。偶然看到有使用ci部署hexo博客的文章，细看工作流和上面的粗暴模式应该是一样的，只是把原来手动拉仓库部署变成了通知ci系统拉仓库部署，">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-03-19T16:00:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用daocloud持续集成部署hexo博客">
+<meta name="twitter:description" content="曾经也为随时随地书写和部署hexo博客这种伪需求折腾过，因为非专业人士，最后想到的办法也就是把hexo目录全部传到github上，在其它地方安装hexo环境，拉下github仓库就可以部署了。这种方法，除了验证了一次的确可行外，事实上一次也没使用过（毕竟伪需求）。偶然看到有使用ci部署hexo博客的文章，细看工作流和上面的粗暴模式应该是一样的，只是把原来手动拉仓库部署变成了通知ci系统拉仓库部署，">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/11/22/使用daocloud持续集成部署hexo博客/"/>
+
+
+
+
+
+  <title> 使用daocloud持续集成部署hexo博客 | 海锚的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">海锚的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">随笔-知识整理</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/22/使用daocloud持续集成部署hexo博客/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="海锚">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar1.jpg">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="海锚的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="海锚的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                使用daocloud持续集成部署hexo博客
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-11-22T00:00:00+08:00">
+                2016-11-22
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              <span class="post-meta-item-text">更新于</span>
+              <time title="更新于" itemprop="dateModified" datetime="2017-03-20T00:00:00+08:00">
+                2017-03-20
+              </time>
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/11/22/使用daocloud持续集成部署hexo博客/" class="leancloud_visitors" data-flag-title="使用daocloud持续集成部署hexo博客">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>曾经也为随时随地书写和部署hexo博客这种伪需求折腾过，因为非专业人士，最后想到的办法也就是把hexo目录全部传到github上，在其它地方安装hexo环境，拉下github仓库就可以部署了。这种方法，除了验证了一次的确可行外，事实上一次也没使用过（毕竟伪需求）。偶然看到有使用ci部署hexo博客的文章，细看工作流和上面的粗暴模式应该是一样的，只是把原来手动拉仓库部署变成了通知ci系统拉仓库部署，省了自己手动安装环境部署的重复工作，方便了许多。借助网上一些免费的服务，试着折腾了一下，粗浅的理解了ci的意思，记录备忘。<a id="more"></a>  </p>
+<h2 id="前述"><a href="#前述" class="headerlink" title="前述"></a>前述</h2><p>这里不细说hexo的部署流程，只说写博客的工作流。在自己电脑上要发布一篇博客的流程是：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">写一篇md文档----本机hexo处理生成静态文件----部署到远端</div></pre></td></tr></table></figure></p>
+<p>在本机有hexo环境的情况下，上面的工作流是一个很简单的过程，只需要<code>hexo g</code>和<code>hexo d</code>就可以了。下面是使用ci来部署hexo博客的工作流：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">写一篇md文档--git提交到远程仓库--触发ci生成静态文件--部署到远端</div></pre></td></tr></table></figure></p>
+<p>可以看到，在这个工作流下发布一篇博客更简单了，只需写完文档后git提交并push到远程仓库即可，剩下的生成静态文件及部署到远端的工作均由ci完成。接下来讨论如何配置这样的一个工作流。  </p>
+<h2 id="创建ci源仓库"><a href="#创建ci源仓库" class="headerlink" title="创建ci源仓库"></a>创建ci源仓库</h2><p>ci源仓库，就是一个和ci系统做关联git仓库。ci系统会给该仓库配置一个webhook，当该仓库有符合触发条件的变动时，会触发webhook通知ci系统拉取该仓库内容，执行指定的操作。粗浅的理解，这就是ci的工作流，推代码到远端、触发、ci拉取、执行、done。<br>由于安全的问题（这个仓库里会存放ssh私钥），这里的仓库须配置为私有仓库，国内推荐使用coding的私有仓库，免费且可以同步到daocloud（本文用的ci）。<br>仓库里要存放的东西就是本地博客根目录里的东西，可以在根目录执行<code>hexo clean</code>清理后，<code>git init</code>初始化仓库推送到远程。在实践中，对于要推送到远程仓库的东西还可以做些取舍和改动。<br>首先，scaffolds、source、themes三个目录和package.json、config.yml两个文件是必须的，这涉及到原始markdown文档，主题，站点配置，hexo模块信息等，ci系统必须根据这些个人化的数据才能部署你的博客。还有一个目录node_modules存放着已安装的node模块，这个目录是不用放进仓库的，可以在每次ci的过程中通过<code>npm install</code>来安装，当然，这也会增加ci过程的时间。其他文件都是不需要放进仓库的，可以使用.gitignore文件进行控制。<br>到这里ci源仓库已经建立了，为了配合ci系统后面我们还会为这个仓库创建一个构建分支用于daocloud构建镜像，我们可以称当前分支为ci分支用于触发ci流程。我这里使用了同一个仓库的两个分支来区分构建和持续集成，在实践上可以根据具体情况来调整，在后面配置daocloud时再详细讨论。  </p>
+<h2 id="创建daocloud代码构建项目"><a href="#创建daocloud代码构建项目" class="headerlink" title="创建daocloud代码构建项目"></a>创建daocloud代码构建项目</h2><p>ci系统有多种，提供公共服务的有国外的<code>travis ci</code>，国内的<code>flow.ci</code>，但能把各个免费的公共服务组合起来达到我们目的的可能不多。daocloud在代码构建这个服务中提供了ci功能，能够达到持续集成部署hexo博客的目的。<br>使用daocloud代码构建功能需要一点docker知识，目前，daocloud代码构建项目的工作流应该是创建一个代码构建项目和远程仓库关联，关联后会同步远程仓库的代码，根据仓库中指定文件（一般是Dockerfile）构建一个镜像，镜像构建成功后，如果该代码构建项目选择了持续集成功能，daocloud会使用该镜像（或者指定的其他镜像）创建一个容器，容器会自动同步远程仓库，执行指定的指令进行代码编译、部署等工作。本质就是搞一个容器，容器会根据你预先写好的指令完成以前要手动执行的工作，实现了所谓的自动化编译部署。<br>由此，我们需要一些控制工作流的脚本文件，这里共需要三个。第一个是Dockerfile，用于构建docker镜像，和在本机上构建镜像是一样的，文件语法是标准的Dockerfile格式，示例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">FROM daocloud.io/library/node</div><div class="line">MAINTAINER xxx &lt;xxx@xx.com&gt;</div><div class="line">RUN echo &quot;Asia/Shanghai&quot; &gt; /etc/timezone &amp;&amp; dpkg-reconfigure -f noninteractive tzdata</div><div class="line">RUN npm --registry=https://registry.npm.taobao.org install hexo-cli -g</div></pre></td></tr></table></figure></p>
+<p>构建镜像里的操作比较简单，使用node作为基础镜像，更改时区、从淘宝源安装<code>hexo-cli</code>两步操作就可以了。上面提到，远程仓库里有两个分支，分别用于构建和持续集成，原因是在目前的应用场景下，构建并不是一个频繁的操作，事实测试好了只需构建一次就可以一直使用这个镜像了，所以我们不想每次推送到远程仓库都会触发构建过程，这会浪费一些时间。所以，这里特别弄了一个分支，构建过程以这个分支作为触发条件即可。这个分支里只有两个文件，<code>Dockerfile</code>和<code>daocloud.yml</code>。<code>daocloud.yml</code>文件是daocloud平台提供的一个用于控制代码构建流程的文件，语法格式为yaml，编写方法可以参考官方文档，也可以不使用这个文件直接在web页面通过web ui界面进行流程控制及编排，可以降低上手难度。这里使用了两个<code>daocloud.yml</code>文件，一个在构建分支，一个在ci分支。构建分支的文件用于指明构建镜像要使用的<code>Dockerfile</code>文件的路径，ci分支的文件用于指明容器运行起来后，要在容器中操作的相关命令。构建分支的<code>daocloud.yml</code>文件内容如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">version: &quot;2.0&quot;</div><div class="line">build:</div><div class="line">  image:</div><div class="line">    dockerfile_path: /Dockerfile</div><div class="line">    build_dir: /</div><div class="line">    cache: true</div></pre></td></tr></table></figure></p>
+<p>cache为true表示构建会使用缓存，如果和上次构建过程没有变化，本次构建会直接使用上次的镜像，但这个过程还是会浪费一些时间，所以如果没有重新构建的需求最好还是避免不必要的出发构建流程。在主分支，就是博客根目录分支的<code>daocloud.yml</code>文件内容如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">version: &quot;2.0&quot;</div><div class="line">test:</div><div class="line">  image: daocloud.io/ivused/hexo-blog-ci:latest</div><div class="line">  install:</div><div class="line">  - npm --registry=https://registry.npm.taobao.org install</div><div class="line">  - git config --global user.name &quot;daocloud-ci&quot;</div><div class="line">  - git config --global user.email &quot;ivused@qq.com&quot;</div><div class="line">  - cp -r .ssh ~/;chmod -R 600 ~/.ssh</div><div class="line">  - echo -e &quot;Host git.coding.net\n  HostName git.coding.net\n  StrictHostKeyChecking no\n\nHost github.com\n  HostName github.com\n  StrictHostKeyChecking no&quot; &gt;&gt; /etc/ssh/ssh_config</div><div class="line">  script:</div><div class="line">  - hexo clean</div><div class="line">  - hexo g</div><div class="line">  - hexo d</div><div class="line">  - rm -rf ~/.ssh</div></pre></td></tr></table></figure></p>
+<p>image指定了运行容器的镜像，在构建镜像成功后可以查看到镜像的地址。install就是在容器中执行的命令了，还不太明白install和script的区别，这里是当成同样的在容器中执行命令的作用来使了。在容器中，默认的当前工作目录为远程仓库触发分支的根目录，所以可以直接执行<code>npm install</code>来安装hexo模块，然后配置了一下git的基础信息、ssh密钥和ssh_config文件信息，目的是为后面向博客pages仓库推送。ssh密钥是在自己电脑上生成的放到主分支下的，这里可能存在安全风险，但可以接受，这个公钥需配置为pages仓库的部署公钥，也仅用于推送到pages仓库，所以就算密钥泄露也不会有太大的损失。还有修改了容器中默认ssh_config文件的配置，使<code>git.coding.net</code>和<code>github.com</code>这两个主机不进行主机密钥验证。ssh认证机制决定了如果连接到一个新主机需要确认一下主机身份，在这个交互式的操作里如果不响应则默认拒绝连接主机，会造成无法推送到pages仓库，当然也可以对所有主机直接关闭或使用选项指定关闭。接下来就是和本机操作一样的三板斧，清理、生成、部署。在实际部署中完全可以不使用<code>daocloud.yml</code>文件来控制流程，daocloud的web ui浅显易懂，直接在web界面操作更直观些。在调试完成后可以直接转换为<code>daocloud.yml</code>文件放到仓库里使用。<br>到这里，准备工作就完成了，我们有一个ci源仓库，有两个分支，主分支为博客根目录，增加的.ssh目录用于存放准备好的ssh密钥，增加了<code>daocloud.yml</code>文件用于控制测试流程，另有一个构建分支，存放了两个文件，一个<code>Dockerfile</code>文件用于构建镜像，一个<code>daocloud.yml</code>文件用于控制构建工作流。接下来在daoclou平台创建一个构建项目，根据情况配置名字、代码仓库、机房即可。项目创建完成后进入项目调整一些设置、触发规则、流程定义等，就可以手动开始构建及测试，一切正常后就可以push到远程仓库，验证自动触发部署。  </p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>目前使用这种方式部署博客整个工作流还是比较满意，对当前本机的部署环境没有任何影响，对部署方式不管是pages服务还是自有主机都不影响，相当于多了一个备份的部署方法，本机有环境就可以本机部署，本机无环境可以直接推到远程仓库使用ci部署。还存在的一些小问题主要是网络问题，由于众所周知的原因，选择国内机房部署到github pages时网络比较慢，甚至会失去连接，可以根据自己pages服务情况选择机房以改善效果。还有每次ci过程都会安装node模块，可以考虑使用国内源加速，或者甚至直接把模块目录推到远程仓库直接使用，这些可能和软件工程的最佳实践不符，不过自己的博客倒也可以折腾玩玩。<br>考虑一下首尾呼应，看看开始说的随时随地写博客的伪需求，在没有自己环境的情况下还是要安装git，拉下来写完推上去，对比暴力模式似乎就是少了一点安装node和hexo的工作，并且都没有解决陌生环境下的密钥安全问题，反思来看，这种应用场景几乎不会存在，折腾可以到此打住。不过，在coding的web页面也可以新建md文档，提交到仓库，倒是某种程度上解决了这种伪需求，算是意外收获。  </p>
+<hr>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="http://ddr888.xyz/2016/08/hexo-deploy-git-docker/#more" target="_blank" rel="external">随时随地让Hexo持续部署</a><br><a href="http://janrone.com/2016/05/10/%E5%88%A9%E7%94%A8Daocloud%E6%8C%81%E7%BB%AD%E9%83%A8%E7%BD%B2Hexo/" target="_blank" rel="external">利用Daocloud持续部署Hexo</a><br><a href="https://segmentfault.com/a/1190000007087471" target="_blank" rel="external">Dockerfile指令汇总及解析</a><br><a href="http://docs.daocloud.io/ci-image-build/daocloud-yml-2-0-preview" target="_blank" rel="external">daocloud.yml 2.0</a><br><a href="https://segmentfault.com/a/1190000004667156" target="_blank" rel="external">用 Travis CI 自动部署 hexo</a><br><a href="http://www.jianshu.com/p/e22c13d85659" target="_blank" rel="external">手把手教你使用Travis CI自动部署你的Hexo博客到Github上</a><br><a href="https://imzlp.me/2016/10/21/using-travis-ci-deploy-hexo-blog-to-githubpages-and-codingpages/" target="_blank" rel="external">使用Travis CI自动部署Github/Coding Pages博客</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/blog/" rel="tag"># blog</a>
+          
+            <a href="/tags/hexo/" rel="tag"># hexo</a>
+          
+            <a href="/tags/daocloud/" rel="tag"># daocloud</a>
+          
+            <a href="/tags/ci/" rel="tag"># ci</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/21/使git忽略已加入版本控制的文件/" rel="next" title="使git忽略已加入版本控制的文件">
+                <i class="fa fa-chevron-left"></i> 使git忽略已加入版本控制的文件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/30/简化markdown文档贴图流程/" rel="prev" title="Windows下简化markdown文档贴图流程">
+                Windows下简化markdown文档贴图流程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar1.jpg"
+               alt="海锚" />
+          <p class="site-author-name" itemprop="name">海锚</p>
+          <p class="site-description motion-element" itemprop="description">Do Not Go Gentle into That Good Night</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">59</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">111</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前述"><span class="nav-number">1.</span> <span class="nav-text">前述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建ci源仓库"><span class="nav-number">2.</span> <span class="nav-text">创建ci源仓库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建daocloud代码构建项目"><span class="nav-number">3.</span> <span class="nav-text">创建daocloud代码构建项目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后记"><span class="nav-number">4.</span> <span class="nav-text">后记</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文档"><span class="nav-number">5.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">海锚</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("FVtbKkkxxv25UhC8a8GLTf2s-gzGzoHsz", "9Rs1yfEP4w4kqiAyJArlpYNE");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+</body>
+</html>

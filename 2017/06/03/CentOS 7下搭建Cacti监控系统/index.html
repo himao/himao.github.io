@@ -1,0 +1,947 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ops,cacti," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="和zabbix和nagios相比，cacti偏重于主机和流量的监控，在流量监控部分会往往会采用cacti。cacti是一个基于lamp的应用，在安装配置cacti之前需要配置好lamp环境。">
+<meta name="keywords" content="ops,cacti">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS 7下搭建Cacti监控系统">
+<meta property="og:url" content="http://yoursite.com/2017/06/03/CentOS 7下搭建Cacti监控系统/index.html">
+<meta property="og:site_name" content="海锚的博客">
+<meta property="og:description" content="和zabbix和nagios相比，cacti偏重于主机和流量的监控，在流量监控部分会往往会采用cacti。cacti是一个基于lamp的应用，在安装配置cacti之前需要配置好lamp环境。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-06-04T16:00:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CentOS 7下搭建Cacti监控系统">
+<meta name="twitter:description" content="和zabbix和nagios相比，cacti偏重于主机和流量的监控，在流量监控部分会往往会采用cacti。cacti是一个基于lamp的应用，在安装配置cacti之前需要配置好lamp环境。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/06/03/CentOS 7下搭建Cacti监控系统/"/>
+
+
+
+
+
+  <title> CentOS 7下搭建Cacti监控系统 | 海锚的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">海锚的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">随笔-知识整理</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/06/03/CentOS 7下搭建Cacti监控系统/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="海锚">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar1.jpg">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="海锚的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="海锚的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                CentOS 7下搭建Cacti监控系统
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-06-03T00:00:00+08:00">
+                2017-06-03
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              <span class="post-meta-item-text">更新于</span>
+              <time title="更新于" itemprop="dateModified" datetime="2017-06-05T00:00:00+08:00">
+                2017-06-05
+              </time>
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/06/03/CentOS 7下搭建Cacti监控系统/" class="leancloud_visitors" data-flag-title="CentOS 7下搭建Cacti监控系统">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>和zabbix和nagios相比，cacti偏重于主机和流量的监控，在流量监控部分会往往会采用cacti。cacti是一个基于lamp的应用，在安装配置cacti之前需要配置好lamp环境。<a id="more"></a>    </p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>cacti是用php语言实现的一个软件，它的主要功能是用snmp服务获取数据，然后用rrdtool储存和更新数据，当用户需要查看数据的时候用rrdtool生成图表呈现给用户。因此，snmp和rrdtool是cacti的关键。Snmp关系着数据的收集，rrdtool关系着数据存储和图表的生成。<br>Mysql配合PHP程序存储一些变量数据并对变量数据进行调用，如：主机名、主机ip、snmp团体名、端口号、模板信息等变量。<br>snmp抓到数据不是存储在mysql中，而是存在rrdtool生成的rrd文件中（在cacti根目录的rra文件夹下）。rrdtool对数据的更新和存储就是对rrd文件的处理，rrd文件是大小固定的档案文件（Round Robin Archive），它能够存储的数据笔数在创建时就已经定义。关于RRDTool的知识请参阅RRDTool教学。</p>
+<h2 id="安装配置lamp"><a href="#安装配置lamp" class="headerlink" title="安装配置lamp"></a>安装配置lamp</h2><h3 id="安装lamp及其他相关工具包"><a href="#安装lamp及其他相关工具包" class="headerlink" title="安装lamp及其他相关工具包"></a>安装lamp及其他相关工具包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">yum install httpd* ----安装Web服务器Apache相关服务</div><div class="line">yum install php* ----安装PHP相关服务</div><div class="line">yum install mariadb* ----安装MariaDB数据库相关服务</div><div class="line">yum install net-snmp* ----安装SNMP相关服务</div><div class="line">yum install rrdtool rrdtool-devel rrdtool-php rrdtool-perl ----安装rrdtool以生成图像</div><div class="line">yum install gd gd-devel php-gd ---rrdtool绘制图像需要的图形库</div><div class="line">2</div></pre></td></tr></table></figure>
+<p>Apache和PHP服务本身默认即可使用，如有其他需要，可自行调整相关配置。  </p>
+<h3 id="配置snmp"><a href="#配置snmp" class="headerlink" title="配置snmp"></a>配置snmp</h3><p>vim /etc/snmp/snmpd.confg<br>将41行（各有不同，请自行查找）下的default更改为127.0.0.1<br>将62行（各有不同，请自行查找）下的systemview更改为all<br>将85行（各有不同，请自行查找）下的#注释掉  </p>
+<h3 id="配置mariadb数据库"><a href="#配置mariadb数据库" class="headerlink" title="配置mariadb数据库"></a>配置mariadb数据库</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 启动数据库服务</span></div><div class="line">systemctl start mariadb.service</div><div class="line"><span class="comment"># 连接数据库，密码为空</span></div><div class="line">mysql -uroot -p</div><div class="line"><span class="comment"># 设置数据库root密码，修改登录权限</span></div><div class="line">MariaDB [(none)]&gt; use mysql;</div><div class="line">MariaDB [mysql]&gt; update user <span class="built_in">set</span> password=password( <span class="string">'wang'</span>) <span class="built_in">where</span> user=<span class="string">'root'</span>;</div><div class="line">MariaDB [mysql]&gt;grant all privileges on *.* to root@localhost identified by ‘wang’ with grant option;</div><div class="line">MariaDB [mysql]&gt;flush privileges;</div><div class="line"><span class="comment"># 添加cacti用户和cacti数据库，设置相关权限</span></div><div class="line">MariaDB [mysql]&gt;create database cacti default character <span class="built_in">set</span> utf8;    <span class="comment">##数据库字符集设置utf8，否则乱码</span></div><div class="line">MariaDB [mysql]&gt;grant all privileges on cacti.* to cacti@localhost identified by ‘cacti’ with grant option;</div><div class="line">MariaDB [mysql]&gt;flush privileges;</div></pre></td></tr></table></figure>
+<h3 id="系统环境确认"><a href="#系统环境确认" class="headerlink" title="系统环境确认"></a>系统环境确认</h3><ol>
+<li>确保lamp相关服务正确安装、启动，做好相关服务的开机启动；</li>
+<li>确保系统时间正常，cacti依赖时间服务，时间不同步会带来很多异常；</li>
+<li>确保系统防火墙关闭，或调整系统防火墙开放cacti端口（默认为80）；</li>
+</ol>
+<h2 id="安装配置cacti"><a href="#安装配置cacti" class="headerlink" title="安装配置cacti"></a>安装配置cacti</h2><ol>
+<li><p>从github上下载到最新的release：<a href="https://github.com/Cacti/cacti/releases" target="_blank" rel="external">https://github.com/Cacti/cacti/releases</a><br>解压并移动到httpd目录下:  </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">tar -zxvf cacti-version.tar.gz</div><div class="line">mv cacti /var/www/html/cacti</div></pre></td></tr></table></figure>
+</li>
+<li><p>将cacti的表导入到之前创建的数据库中：</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> /var/www/html/cacti </div><div class="line">mysql -ucacti -pcacti cacti &lt; /var/www/html/cacti/cacti.sql</div></pre></td></tr></table></figure>
+<ol>
+<li>配置cacti相关的php文件<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">vim /var/www/html/cacti/include/config.php</div><div class="line"><span class="comment">#修改如下</span></div><div class="line"><span class="variable">$database_type</span> = <span class="string">"mysql"</span>;</div><div class="line"><span class="variable">$database_default</span> = <span class="string">"cacti"</span>;</div><div class="line"><span class="variable">$database_hostname</span> = <span class="string">"localhost"</span>;</div><div class="line"><span class="variable">$database_username</span> = <span class="string">"cactiuser"</span>;    //因为我们先前在数据库建的是 <span class="string">"cacti"</span> 用户，所以这里默认的 <span class="string">"cactiuser"</span> 要改为 <span class="string">"cacti"</span></div><div class="line"><span class="variable">$database_password</span> = <span class="string">"cactiuser"</span>;    //这里默认的密码我们也要改为 <span class="string">"cacti"</span></div><div class="line"><span class="variable">$database_port</span> = <span class="string">"3306"</span>;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>如果不存在该文件，在同目录下找到config.php.dist文件复制一份即可。global.php修改同上。</p>
+<ol>
+<li><p>增加cacti用户用来写入rrd和log目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">useradd cacti</div><div class="line"><span class="built_in">cd</span> /var/www/html/cacti</div><div class="line">chown -R cacti rra/ <span class="built_in">log</span>/</div></pre></td></tr></table></figure>
+</li>
+<li><p>添加计划任务用于采集数据，生成图表</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">crontab -e</div><div class="line">*/5 * * * * php /var/www/html/cacti/poller.php &gt; /dev/null 2&gt;&amp;1</div></pre></td></tr></table></figure>
+</li>
+<li><p>启动httpd服务，访问<code>http://ip/cacti</code>，进入cacti的web安装配置界面<br>web界面提示较为详细，根据提示安装仍缺失的插件，按照安装向导最终完成安装。web安装向导会检查安装环境，一般情况下会出现数据库时区设置、PHP模块缺失、数据库字符集及性能配置等问题。常见问题可参考troubleshooting部分内容。  </p>
+</li>
+</ol>
+<h2 id="TroubleShooting"><a href="#TroubleShooting" class="headerlink" title="TroubleShooting"></a>TroubleShooting</h2><h3 id="无法访问http-ip-cacti问题"><a href="#无法访问http-ip-cacti问题" class="headerlink" title="无法访问http://ip/cacti问题"></a>无法访问<code>http://ip/cacti</code>问题</h3><p>访问<code>http://ip/cacti</code>出现：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Forbidden </div><div class="line">You don't have permission to access /cacti on this server.</div></pre></td></tr></table></figure></p>
+<p>一般是因为开启了SELinux导致的权限问题，可以搜索研究SELinux下的权限控制问题或直接关闭SELinux。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 查看SELinux状态</span></div><div class="line">/usr/sbin/sestatus -v</div><div class="line"><span class="comment"># 关闭SELinux</span></div><div class="line"><span class="comment">## 临时关闭，不用重启</span></div><div class="line">setenforce 0	//关闭</div><div class="line">setenforce 1	//开启</div><div class="line"><span class="comment">## 永久关闭，需重启</span></div><div class="line">vi /etc/selinux/config</div><div class="line">SELINUX=enforcing 修改为 SELINUX=<span class="built_in">disable</span></div></pre></td></tr></table></figure></p>
+<h3 id="统计图字体乱码问题"><a href="#统计图字体乱码问题" class="headerlink" title="统计图字体乱码问题"></a>统计图字体乱码问题</h3><p>一般是中文字体乱码，原因可能为rrdtool调用字体失败，安装字体，刷新缓存即可。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 安装字体</span></div><div class="line">yum -y install cjkuni-ukai-fonts</div><div class="line"><span class="comment"># 刷新字体缓存</span></div><div class="line"><span class="built_in">fc</span>-cache -f -v</div></pre></td></tr></table></figure></p>
+<p>刷新统计图，应该可以恢复正常。  </p>
+<h3 id="有图无数据问题"><a href="#有图无数据问题" class="headerlink" title="有图无数据问题"></a>有图无数据问题</h3><p>原因比较多，可以查看<code>/var/www/html/cacti/log</code>目录下的log文件，获取更详细信息。  </p>
+<ol>
+<li><p>系统时间错误<br>系统时间不一致，导致定时任务执行异常，调整系统时间，重新生成图像。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> /var/www/html/cacti/rra</div><div class="line">rm -rf ./*</div><div class="line">/usr/bin/php /var/www/html/cacti/poller.php -force</div></pre></td></tr></table></figure>
+</li>
+<li><p>相关目录权限异常<br>一般涉及两个目录cacti主目录下的<code>rra/</code>和<code>log/</code>目录，需要确保对<code>httpd</code>和<code>crond</code>进程的用户可读写，可以简单的改为<code>777</code>来使用。  </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">chmod 777 -R rra/</div><div class="line">chmod 777 -R <span class="built_in">log</span>/</div></pre></td></tr></table></figure>
+</li>
+<li><p>snmp未采集到数据问题<br>通过<code>snmpwalk</code>工具验证对目标主机的数据采集是否正常。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 验证目标主机是否开启snmp服务</span></div><div class="line">snmpwalk -v 2c -c public ServerIP <span class="keyword">if</span></div><div class="line"><span class="comment"># 验证是否能采集到目标主机的CPU负载信息</span></div><div class="line">snmpwalk -v 2c ServerIP -c public .1.3.6.1.4.1.2021.10.1.3</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="MariaDB字符集和性能配置问题"><a href="#MariaDB字符集和性能配置问题" class="headerlink" title="MariaDB字符集和性能配置问题"></a>MariaDB字符集和性能配置问题</h3><p>在cacti的web安装配置界面，可能会检测到MariaDB的字符集异常，会对后面的中文使用产生问题。默认的一些配置可能会影响cacti的性能，需要调整。修改数据库配置文件，在<code>[mysqld]</code>部分添加如下内容：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">vi /etc/my.cnf</div><div class="line"><span class="comment"># 调整字符集</span></div><div class="line">[mysqld]</div><div class="line">init_connect=<span class="string">'SET collation_connection = utf8_general_ci'</span></div><div class="line">init_connect=<span class="string">'SET NAMES utf8'</span></div><div class="line">character-set-server=utf8</div><div class="line">collation-server=utf8_general_ci</div><div class="line">skip-character-set-client-handshake</div><div class="line"><span class="comment"># 调整应用配置</span></div><div class="line">max_heap_table_size=64M</div><div class="line">tmp_table_size=64M</div><div class="line">join_buffer_size=64M</div><div class="line">max_allowed_packet=20000000</div><div class="line">innodb_file_per_table=on</div><div class="line">innodb_buffer_pool_size=256M</div><div class="line">innodb_doublewrite=on</div><div class="line">innodb_additional_mem_pool_size=128M</div><div class="line">innodb_flush_log_at_trx_commit=2</div></pre></td></tr></table></figure></p>
+<h3 id="数据库时区设置问题"><a href="#数据库时区设置问题" class="headerlink" title="数据库时区设置问题"></a>数据库时区设置问题</h3><p>初次登录cacti的web安装页面，可能会出现如下错误提示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ERROR:Your Cacti database login account does not have access to the MySQL TimeZone database. Please provide the Cacti database account “select” access to the “time_zone_name” table in the “mysql” database, and populate MySQL’s TimeZone information before proceeding.</div></pre></td></tr></table></figure></p>
+<p>使用以下命令处理：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mysql&gt; GRANT SELECT ON mysql.time_zone_name TO cactiuser@localhost IDENTIFIED BY <span class="string">'cacti'</span></div></pre></td></tr></table></figure></p>
+<p>或者可能能有以下错误提示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ERROR: Your MySQL TimeZone database is not populated. Please populate this database before proceeding.</div></pre></td></tr></table></figure></p>
+<p>使用以下命令处理：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mysql_tzinfo_to_sql /usr/share/zoneinfo/ | mysql -u root -p mysql</div></pre></td></tr></table></figure></p>
+<p>  ​</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ops/" rel="tag"># ops</a>
+          
+            <a href="/tags/cacti/" rel="tag"># cacti</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/02/CentOS下使用BIND搭建DNS服务器/" rel="next" title="CentOS7下使用BIND搭建DNS服务器">
+                <i class="fa fa-chevron-left"></i> CentOS7下使用BIND搭建DNS服务器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/06/BIND对下划线域名解析问题/" rel="prev" title="BIND对含下划线域名解析问题">
+                BIND对含下划线域名解析问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar1.jpg"
+               alt="海锚" />
+          <p class="site-author-name" itemprop="name">海锚</p>
+          <p class="site-description motion-element" itemprop="description">Do Not Go Gentle into That Good Night</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">59</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">111</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本概念"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装配置lamp"><span class="nav-number">2.</span> <span class="nav-text">安装配置lamp</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装lamp及其他相关工具包"><span class="nav-number">2.1.</span> <span class="nav-text">安装lamp及其他相关工具包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置snmp"><span class="nav-number">2.2.</span> <span class="nav-text">配置snmp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置mariadb数据库"><span class="nav-number">2.3.</span> <span class="nav-text">配置mariadb数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统环境确认"><span class="nav-number">2.4.</span> <span class="nav-text">系统环境确认</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装配置cacti"><span class="nav-number">3.</span> <span class="nav-text">安装配置cacti</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TroubleShooting"><span class="nav-number">4.</span> <span class="nav-text">TroubleShooting</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#无法访问http-ip-cacti问题"><span class="nav-number">4.1.</span> <span class="nav-text">无法访问http://ip/cacti问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#统计图字体乱码问题"><span class="nav-number">4.2.</span> <span class="nav-text">统计图字体乱码问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有图无数据问题"><span class="nav-number">4.3.</span> <span class="nav-text">有图无数据问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MariaDB字符集和性能配置问题"><span class="nav-number">4.4.</span> <span class="nav-text">MariaDB字符集和性能配置问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据库时区设置问题"><span class="nav-number">4.5.</span> <span class="nav-text">数据库时区设置问题</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">海锚</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("FVtbKkkxxv25UhC8a8GLTf2s-gzGzoHsz", "9Rs1yfEP4w4kqiAyJArlpYNE");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+</body>
+</html>

@@ -1,0 +1,988 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Windows,AD," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="windows办公环境中，处于管理需要，往往会使用AD域来进行控制，AD域的核心在于DC服务器的搭建。">
+<meta name="keywords" content="Windows,AD">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Windows 2008的DC服务器搭建">
+<meta property="og:url" content="http://yoursite.com/2017/05/28/Windows-DC-Server/index.html">
+<meta property="og:site_name" content="海锚的博客">
+<meta property="og:description" content="windows办公环境中，处于管理需要，往往会使用AD域来进行控制，AD域的核心在于DC服务器的搭建。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290803_674.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290805_658.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290808_37.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290807_489.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290812_529.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290813_291.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290819_75.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290827_86.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290828_863.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290830_411.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290835_440.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290837_49.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290840_560.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290844_973.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290845_531.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290847_643.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290848_27.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290901_655.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290918_97.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290924_271.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290924_944.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290925_95.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290925_408.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290926_76.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290951_836.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290952_63.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290953_697.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290954_344.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290955_443.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291045_998.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291047_605.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291048_447.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291049_767.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291053_186.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291053_358.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291059_692.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291121_751.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291124_423.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291125_88.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291129_779.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291131_394.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291135_941.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291140_756.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291141_831.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291145_406.png">
+<meta property="og:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705291146_599.png">
+<meta property="og:updated_time" content="2017-05-27T16:00:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于Windows 2008的DC服务器搭建">
+<meta name="twitter:description" content="windows办公环境中，处于管理需要，往往会使用AD域来进行控制，AD域的核心在于DC服务器的搭建。">
+<meta name="twitter:image" content="http://o7d8o9a5v.bkt.clouddn.com/201705290803_674.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"hide"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/05/28/Windows-DC-Server/"/>
+
+
+
+
+
+  <title> 基于Windows 2008的DC服务器搭建 | 海锚的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">海锚的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">随笔-知识整理</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/28/Windows-DC-Server/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="海锚">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar1.jpg">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="海锚的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="海锚的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                基于Windows 2008的DC服务器搭建
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-28T00:00:00+08:00">
+                2017-05-28
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              <span class="post-meta-item-text">更新于</span>
+              <time title="更新于" itemprop="dateModified" datetime="2017-05-28T00:00:00+08:00">
+                2017-05-28
+              </time>
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/05/28/Windows-DC-Server/" class="leancloud_visitors" data-flag-title="基于Windows 2008的DC服务器搭建">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>windows办公环境中，处于管理需要，往往会使用AD域来进行控制，AD域的核心在于DC服务器的搭建。<a id="more"></a>  </p>
+<h2 id="安装准备"><a href="#安装准备" class="headerlink" title="安装准备"></a>安装准备</h2><ol>
+<li>安装环境为Windows Server 2008 R2</li>
+<li>修改DC服务器计算机名<br>为了便于识别和管理，建议在配置DC服务器前修改服务器名称。配置DC服务器后也可以修改，但相对繁琐。</li>
+<li>手动配置服务器IP<br>DC服务器需要使用静态IP配置，请结合具体的网络拓扑，合理分配IP地址。</li>
+<li>数据规划<br> 需提前规划好域名及相关密码。如果有特殊需求，在部署前需考虑整个域的架构以及配套DNS服务器的部署情况。一般小规模环境中使用单域林单域树单域的架构，并且DC和DNS部署在一台服务器上即可满足使用。  </li>
+</ol>
+<h2 id="安装配置DC服务器"><a href="#安装配置DC服务器" class="headerlink" title="安装配置DC服务器"></a>安装配置DC服务器</h2><ol>
+<li>打开<code>服务器管理器</code>,使用<code>添加角色</code>功能,启动<code>添加角色向导</code>.<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290803_674.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290805_658.png" alt=""></li>
+<li>勾选AD域服务，同时需安装.NET Framework。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290808_37.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290807_489.png" alt=""></li>
+<li>部分提示信息，直接下一步后，安装即可。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290812_529.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290813_291.png" alt=""></li>
+<li>安装成功后，关闭<code>添加角色向导</code>或者点击关闭向导，启动dcpromo,开始DC配置。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290819_75.png" alt=""></li>
+<li>打开AD域服务安装向导，开始DC配置，警告部分不用考虑，下一步。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290827_86.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290828_863.png" alt=""></li>
+<li>注意，如果是内网中第一台DC服务器，要选择<code>在新林中新建域</code>.<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290830_411.png" alt=""></li>
+<li>命名新林中的根域域名，一般为<code>xxx.com</code>的形式。该部分数据需规划好，因为配置完成后更改根域名称非常繁琐。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290835_440.png" alt=""></li>
+<li>注意选择<code>林功能级别</code>,选定指定级别后则该林中不能添加低于该级别的DC服务器。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290837_49.png" alt=""></li>
+<li>DC需要配合DNS服务，下一步验证通过后，会进入DNS配置部分。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290840_560.png" alt=""></li>
+<li>一般情况下，不需要指定DNS委派，直接下一步即可。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290844_973.png" alt=""></li>
+<li>AD数据存储部分，根据情况调整，简单环境默认即可。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290845_531.png" alt=""></li>
+<li>创建目录还原模式密码，供紧急情况使用。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290847_643.png" alt=""></li>
+<li>检查配置项，确认无问题后下一步开始安装。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290848_27.png" alt=""></li>
+<li>安装完成，可能需重启计算机生效。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290901_655.png" alt=""></li>
+</ol>
+<h2 id="AD域基本使用"><a href="#AD域基本使用" class="headerlink" title="AD域基本使用"></a>AD域基本使用</h2><p>借助管理工具中的<code>AD用户和计算机</code>工具可以方便的对AD域进行基本管理。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290918_97.png" alt=""></p>
+<h3 id="创建组织单位"><a href="#创建组织单位" class="headerlink" title="创建组织单位"></a>创建组织单位</h3><p><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290924_271.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290924_944.png" alt=""></p>
+<h3 id="创建域账户"><a href="#创建域账户" class="headerlink" title="创建域账户"></a>创建域账户</h3><p><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290925_95.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290925_408.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290926_76.png" alt=""></p>
+<h3 id="加入域"><a href="#加入域" class="headerlink" title="加入域"></a>加入域</h3><p>首先调整主机DNS配置，确认主机可以正确解析该域域名，确保主机和DC通信正常，这是主机加入域的基础。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290951_836.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290952_63.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290953_697.png" alt=""><br>需要域管理员的用户名密码：<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290954_344.png" alt=""><br>加入成功：<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705290955_443.png" alt=""><br>重启计算机后生效。<br>加入域的计算机会有本地账户和域账户的区分，在登录时使用<code>计算机名\用户名</code>的形式登录本地账户，使用<code>用户名@域名</code>的形式登录域账户。  </p>
+<h2 id="典型应用参考"><a href="#典型应用参考" class="headerlink" title="典型应用参考"></a>典型应用参考</h2><h3 id="基于AD域的打印机部署"><a href="#基于AD域的打印机部署" class="headerlink" title="基于AD域的打印机部署"></a>基于AD域的打印机部署</h3><ol>
+<li>首先确保打印机是共享的，在域内可以被其他成员和DC访问.打开<code>管理工具\打印管理</code>,选择待部署的打印机，使用组策略部署。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291045_998.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291047_605.png" alt="">  </li>
+<li>选择要使用的组策略对象，根据需要，默认选择对整个域生效的组策略：<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291048_447.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291049_767.png" alt="">  </li>
+<li>注意将组策略应用到计算机和用户的区别，应用的计算机是对域内所有计算机生效，一般在计算机重启时安装；应用到用户是对域内用户生效，用户在域内任何计算机登录时均会应用该组策略。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291053_186.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291053_358.png" alt="">  </li>
+<li><p>验证是否生效：<br>在DC服务器上使用更新命令，确保刚刚配置的组策略立即生效：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">gpupdate /force</div></pre></td></tr></table></figure>
+</li>
+<li><p>在成员主机上注销域账户，重新登录，策略正常生效则会在<code>设备和打印机</code>中看到刚刚发布的打印机。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291059_692.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="基于AD域的软件分发"><a href="#基于AD域的软件分发" class="headerlink" title="基于AD域的软件分发"></a>基于AD域的软件分发</h3><p>一般情况下AD域支持对<code>.msi</code>后缀软件分发，不支持<code>.exe</code>后缀。<code>.exe</code>后缀软件的分发会通过脚本或重新打包进行，后面可单独讨论该问题。  </p>
+<ol>
+<li>首先在DC服务器上创建共享目录，作为分发软件的挂载点，所有待分发软件均放到该目录下并确保域内其他计算机可以访问，否则分发会失败。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291121_751.png" alt="">  </li>
+<li>打开<code>开始-管理工具-组策略管理-组策略对象-新建</code>,新建一个软件分发的组策略对象：<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291124_423.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291125_88.png" alt="">  </li>
+<li>双击\编辑新建的组策略对象，进入<code>组策略管理编辑器</code>,依次展开<code>用户配置-策略-软件设置-软件安装-新建-数据包</code>,创建一个新的安装包：<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291129_779.png" alt=""><br>在选择软件包时注意不要选择本地路径，要选择网络路径，即之前共享的网络路径。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291131_394.png" alt=""><br>选择软件的部署方式，<code>已发布</code>的软件不会直接安装到成员计算机上，会在<code>添加删除程序</code>界面显示，由用户决定是否安装；<code>已分配</code>的软件会自动安装到成员计算机上。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291135_941.png" alt="">  </li>
+<li>完成组策略对象编辑后，回到<code>组策略管理</code>，选择需要部署软件的组织，链接到现有GPO：<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291140_756.png" alt=""><br>选择刚刚创建编辑的GPO<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291141_831.png" alt="">  </li>
+<li>使用<code>gpupdate /force</code>,使刚刚的组策略更改立即生效。<br>在其它成员计算机上验证结果，注销后登陆，在<code>添加删除程序</code>中可以查看到已发布的软件。<br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291145_406.png" alt=""><br><img src="http://o7d8o9a5v.bkt.clouddn.com/201705291146_599.png" alt=""><br>完成。<br>分配方式和发布方式部署过程一致，会在计算机开机时自动安装软件，不再详述。  </li>
+</ol>
+<h2 id="其它问题"><a href="#其它问题" class="headerlink" title="其它问题"></a>其它问题</h2><ol>
+<li>在不考虑成本情况下，可考虑选择较新系统来部署AD域，系统的安全和性能都会有提升。  </li>
+<li>DC作为域内核心节点需考虑单节点故障问题，可考虑Windows的故障转移群集，使用多台DC做主备，以实现高可用。多台DC问题相对复杂，可能需进一步研究探讨。</li>
+<li>多系统环境应用。除了Windows外，AD域中可能会存在多种操作系统，比如主流的Linux和macOS。目前不是重点，待有需求时进一步研究处理。  </li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Windows/" rel="tag"># Windows</a>
+          
+            <a href="/tags/AD/" rel="tag"># AD</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/06/Wireshark远程抓包/" rel="next" title="Wireshark远程抓包">
+                <i class="fa fa-chevron-left"></i> Wireshark远程抓包
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/29/搭建KMS服务/" rel="prev" title="搭建KMS服务">
+                搭建KMS服务 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar1.jpg"
+               alt="海锚" />
+          <p class="site-author-name" itemprop="name">海锚</p>
+          <p class="site-description motion-element" itemprop="description">Do Not Go Gentle into That Good Night</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">59</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">111</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装准备"><span class="nav-number">1.</span> <span class="nav-text">安装准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装配置DC服务器"><span class="nav-number">2.</span> <span class="nav-text">安装配置DC服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AD域基本使用"><span class="nav-number">3.</span> <span class="nav-text">AD域基本使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建组织单位"><span class="nav-number">3.1.</span> <span class="nav-text">创建组织单位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建域账户"><span class="nav-number">3.2.</span> <span class="nav-text">创建域账户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#加入域"><span class="nav-number">3.3.</span> <span class="nav-text">加入域</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#典型应用参考"><span class="nav-number">4.</span> <span class="nav-text">典型应用参考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基于AD域的打印机部署"><span class="nav-number">4.1.</span> <span class="nav-text">基于AD域的打印机部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于AD域的软件分发"><span class="nav-number">4.2.</span> <span class="nav-text">基于AD域的软件分发</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其它问题"><span class="nav-number">5.</span> <span class="nav-text">其它问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">海锚</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("FVtbKkkxxv25UhC8a8GLTf2s-gzGzoHsz", "9Rs1yfEP4w4kqiAyJArlpYNE");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+</body>
+</html>
